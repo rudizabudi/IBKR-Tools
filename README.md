@@ -1,7 +1,7 @@
 # ibkr_beta_weighted_deltas.py
 Calculates beta weighted deltas for your single account portfolio. Connects to Trader Workstation / IB Gateway API.
 ## Example
-![Example](https://i.imgur.com/TgMwlfF.png)
+![Example](https://i.imgur.com/8FKIUdS.png)
 ## Settings
 ### Customization
 ![Customizattion](https://i.imgur.com/ihCPi14.png)
