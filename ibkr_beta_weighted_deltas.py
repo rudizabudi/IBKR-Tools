@@ -13,12 +13,14 @@ import yfinance as yf
 
 '''**********************************************************************
 * Project           : IBKR Beta Weighted Deltas
-* Version           : v0.2
+* Version           : v0.22
 * 
 * Date        Ref    Revision
-* 20240124    v0.1      beta
+* 20240124    v0.1      Beta
 * 20240125    v0.2      Notional Positions
                         Position selection
+* 20240130    v0.21     Fixed bug. Show greeks as in TWS (tickType 13)
+* 20240131    v0.22     More efficient wait for callbacks to finish
 **********************************************************************'''
 
 class APIController(EWrapper, EClient):
@@ -33,7 +35,9 @@ class APIController(EWrapper, EClient):
     def tickOptionComputation(self, reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice):
         super().tickOptionComputation(reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice)
         #print((self, reqId, tickType, tickAttrib,impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice))
-        self.req_greeks[reqId] = [delta, gamma, vega, theta, impliedVol, optPrice]
+        if tickType == 13 and delta is not None:
+            self.greek_counter += 1
+            self.req_greeks[reqId] = [delta, gamma, vega, theta, impliedVol, optPrice]
 
     def position(self, account, contract, position, avgCost):
         super().position(account, contract, position, avgCost)
@@ -84,7 +88,11 @@ class TradingApplication(APIController, APISocket):
         self.counter = 0
         self.download_end = False
         self.betas = {}
+
         self.req_greeks = {}
+        self.greek_counter = 0
+        self.greek_assigns = {}
+
         self.current_prices = {}
         time.sleep(3)
 
@@ -95,7 +103,6 @@ class TradingApplication(APIController, APISocket):
         self.reqAccountUpdates(True, "U10679162")
         t = threading.Thread(target=self.run)
         t.start()
-
 
     def position_selection(self):
 
@@ -120,6 +127,7 @@ class TradingApplication(APIController, APISocket):
     def request_delta(self):
         req_id = 0
         self.req_greeks = {}
+        self.greek_assigns = {}
         for k, v in self.selected_positions.items():
             for i, x in enumerate(v, start=0):
                 if x['contract']['secType'] == 'OPT' and int(date.today().strftime('%Y%m%d')) <= int(x['contract']['lastTradeDateOrContractMonth']):
@@ -134,22 +142,16 @@ class TradingApplication(APIController, APISocket):
                     req_contract.lastTradeDateOrContractMonth = x['contract']['lastTradeDateOrContractMonth']
 
                     self.req_greeks[req_id] = []
-                    self.reqMktData(req_id, req_contract, "", True, False, [])
+                    self.reqMktData(req_id, req_contract, "13", True, False, [])
 
-                    while self.req_greeks[req_id] == []:
-                        time.sleep(0.1)
-
-                    self.selected_positions[k][i]['delta'] = self.req_greeks[req_id][0]
+                    self.greek_assigns[req_id] = [k, i]
                     req_id += 1
 
-                    # if req_delta.right == 'C':
-                    #     rnd_delta = random.uniform(0, 1)
-                    # else:
-                    #     rnd_delta = random.uniform(-1, 0)
-                    # delta = rnd_delta
+        while not self.greek_counter == req_id:
+            time.sleep(0.1)
 
-        #print('RegGreeks:', self.req_greeks)
-        #print(self.selected_positions)
+        for i in range(req_id):
+            self.selected_positions[self.greek_assigns[i][0]][self.greek_assigns[i][1]]['delta'] = self.req_greeks[i][0]
 
     def calculate_beta(self):
         bench_hist = yf.Ticker(self.benchmark).history(period=self.beta_period)
@@ -168,7 +170,7 @@ class TradingApplication(APIController, APISocket):
             self.betas[k] = beta
 
     def table(self):
-        df = {'Underlying': [], 'Beta / Position': [], 'Amount': [], 'Delta': [], 'Beta weighted Delta': [], 'Notional Position': []} #
+        df = {'Underlying': [], 'Beta / Position': [], 'Amount': [], 'Delta': [], 'Beta weighted Delta': [], 'Notional Position': []}
         beta_list = []
         delta_list = []
         bwd_list = []
@@ -195,13 +197,14 @@ class TradingApplication(APIController, APISocket):
                 df['Amount'].append(amount)
 
                 if y['contract']['secType'] == 'OPT':
-                    #try:
-                    delta = y['delta'] * amount * 100 #TODO: implement options other than multiplicator == 100
-                    # except KeyError:
-                    #     print(y)
-                    #     print(self.selected_positions)
-                    #     print('- - - ')
-                    #     exit()
+                    try:
+                        delta = y['delta'] * amount * 100 #TODO: implement options other than multiplicator == 100
+                    except KeyError:
+                        print(y)
+                        print( )
+                        print(self.selected_positions)
+                        print('- - - ')
+                        exit()
                 elif y['contract']['secType'] == 'STK':
                     delta = amount
                 df['Delta'].append(round(delta, 2))
