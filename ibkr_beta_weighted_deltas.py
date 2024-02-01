@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
+import ibapi.account_summary_tags as account_summary_tags
 import pandas
 import random
 from tabulate import tabulate
@@ -31,6 +32,15 @@ class APIController(EWrapper, EClient):
 
     def connectAck(self):
         print('Connected')
+
+    def managedAccounts(self, accountsList):
+        super().managedAccounts(accountsList)
+        self.accountsList = accountsList[:-1].split(',')
+        #print("Account list:", accountsList)
+
+    def accountSummary(self, reqId, account, tag, value, currency):
+        super().accountSummary(reqId, account, tag, value, currency)
+        #print("AccountSummary. ReqId:", reqId, "Account:", account,"Tag: ", tag, "Value:", value, "Currency:", currency)
 
     def tickOptionComputation(self, reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice):
         super().tickOptionComputation(reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice)
@@ -62,7 +72,6 @@ class APIController(EWrapper, EClient):
                 self.positions[contract['symbol']].append({'contract': contract, 'position': position})
             else:
                 self.positions[contract['symbol']] = [{'contract': contract, 'position': position}]
-
     # def tickPrice(self, regId, data, oans, zwoa):
     #     print(regId)
 
@@ -78,11 +87,13 @@ class TradingApplication(APIController, APISocket):
         self.benchmark = '^SPX'
         self.beta_period = '1y' ## Valid periods: d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
         self.view_selection = True
+        self.acctCode = 0 #selected subacount by alphanumerical order. Start = 0
 
         APIController.__init__(self)
         APISocket.__init__(self, wrapper=self)
-        #self.connect('127.0.0.1', 7496, 1)
         self.connect('127.0.0.1', self.api_port, 1)
+
+        self.accountsList = []
 
         self.selected_positions = {}
         self.counter = 0
@@ -98,11 +109,20 @@ class TradingApplication(APIController, APISocket):
 
     def get_positions(self):
 
-        self.positions = {}
-        self.download_end = False
-        self.reqAccountUpdates(True, "U10679162")
         t = threading.Thread(target=self.run)
         t.start()
+
+        self.positions = {}
+        self.download_end = False
+
+        self.reqManagedAccts()
+        while not self.accountsList:
+            time.sleep(0.1)
+
+        #        self.reqAccountSummary(1337, "All", account_summary_tags.AccountSummaryTags.AllTags)
+        self.reqAccountUpdates(True, self.accountsList[self.acctCode])
+
+
 
     def position_selection(self):
 
