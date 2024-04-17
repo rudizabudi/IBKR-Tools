@@ -123,9 +123,7 @@ class TradingApplication(APIController, APISocket):
         while not self.accountsList:
             time.sleep(0.1)
 
-        #        self.reqAccountSummary(1337, "All", account_summary_tags.AccountSummaryTags.AllTags)
         self.reqAccountUpdates(True, self.accountsList[self.acctCode])
-
 
     def position_selection(self):
 
