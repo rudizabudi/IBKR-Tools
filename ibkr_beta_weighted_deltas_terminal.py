@@ -6,6 +6,7 @@ from ibapi.contract import Contract
 import ibapi.account_summary_tags as account_summary_tags
 import pandas
 import random
+import sys
 from tabulate import tabulate
 import threading
 from threading import Timer
@@ -13,7 +14,7 @@ import time
 import yfinance as yf
 
 '''**********************************************************************
-* Project           : IBKR Beta Weighted Deltas
+* Project           : IBKR Beta Weighted Deltas Terminal
 * Version           : v0.22
 * 
 * Date        Ref    Revision
@@ -95,11 +96,14 @@ class TradingApplication(APIController, APISocket):
 
         self.accountsList = []
 
+        self.pos_sub_started = False
+        self.selection = -1
         self.selected_positions = {}
         self.counter = 0
         self.download_end = False
         self.betas = {}
 
+        self.first_version_printed = False
         self.req_greeks = {}
         self.greek_counter = 0
         self.greek_assigns = {}
@@ -123,26 +127,24 @@ class TradingApplication(APIController, APISocket):
         self.reqAccountUpdates(True, self.accountsList[self.acctCode])
 
 
-
     def position_selection(self):
 
-        print()
-        selection = -1
-        if self.view_selection:
+        if self.view_selection and not self.pos_sub_started:
+            print()
             print('Which holdings do you want data for? ')
             print(0, ': ', 'All positions')
             for i, x in enumerate(self.positions.keys(), start=1):
                 print(i, ': ', x)
 
-            while selection not in range(0, len(self.positions.keys()) + 1):
-                selection = int(input('Position #: '))
+            while self.selection not in range(0, len(self.positions.keys()) + 1):
+                self.selection = int(input('Position #: '))
 
             print()
 
-        if selection == 0 or not self.view_selection:
+        if self.selection == 0 or not self.view_selection:
             self.selected_positions = self.positions
         else:
-            self.selected_positions[list(self.positions.keys())[selection - 1]] = self.positions[list(self.positions.keys())[selection - 1]]
+            self.selected_positions[list(self.positions.keys())[self.selection - 1]] = self.positions[list(self.positions.keys())[self.selection - 1]]
 
     def request_delta(self):
         req_id = 0
@@ -167,12 +169,15 @@ class TradingApplication(APIController, APISocket):
                     self.greek_assigns[req_id] = [k, i]
                     req_id += 1
 
-        while not self.greek_counter == req_id:
+        while self.greek_counter != req_id:
+        #while [x for x in self.req_greek.keys()]
             time.sleep(0.1)
 
+        time.sleep(1)
+        self.greek_counter = 0
         for i in range(req_id):
             self.selected_positions[self.greek_assigns[i][0]][self.greek_assigns[i][1]]['delta'] = self.req_greeks[i][0]
-
+        print('Selected_Positions:', self.selected_positions)
     def calculate_beta(self):
         bench_hist = yf.Ticker(self.benchmark).history(period=self.beta_period)
         bench_hist['Change'] = bench_hist['Close'].pct_change()
@@ -195,109 +200,119 @@ class TradingApplication(APIController, APISocket):
         delta_list = []
         bwd_list = []
         np_list = []
-        for k, v in self.betas.items():
-            df['Underlying'].append(k)
-            df['Beta / Position'].append(round(v, 2))
-            beta_list.append(round(v, 2))
-            df['Amount'].append('')
-            df['Delta'].append('')
-            df['Beta weighted Delta'].append('')
-            df['Notional Position'].append('')
+        try:
+            for k, v in self.betas.items():
+                df['Underlying'].append(k)
+                df['Beta / Position'].append(round(v, 2))
+                beta_list.append(round(v, 2))
+                df['Amount'].append('')
+                df['Delta'].append('')
+                df['Beta weighted Delta'].append('')
+                df['Notional Position'].append('')
 
-            beta = v
-            for y in self.selected_positions[k]:
-                df['Underlying'].append('')
-                if y['contract']['secType'] == 'OPT':
-                    name = str(y['contract']['strike']) + ' ' + ('Call' if y['contract']['right'] == 'C' else 'Put') + ' ' + dt.strptime(y['contract']['lastTradeDateOrContractMonth'], '%Y%m%d').strftime('%d%b%y')
-                elif y['contract']['secType'] == 'STK':
-                    name = k + ' ' + 'Stock'
-                df['Beta / Position'].append(name)
+                beta = v
+                for y in self.selected_positions[k]:
+                    df['Underlying'].append('')
+                    if y['contract']['secType'] == 'OPT':
+                        name = str(y['contract']['strike']) + ' ' + ('Call' if y['contract']['right'] == 'C' else 'Put') + ' ' + dt.strptime(y['contract']['lastTradeDateOrContractMonth'], '%Y%m%d').strftime('%d%b%y')
+                    elif y['contract']['secType'] == 'STK':
+                        name = k + ' ' + 'Stock'
+                    df['Beta / Position'].append(name)
 
-                amount = y['position']
-                df['Amount'].append(amount)
+                    amount = y['position']
+                    df['Amount'].append(amount)
 
-                if y['contract']['secType'] == 'OPT':
-                    try:
+                    if y['contract']['secType'] == 'OPT':
                         delta = y['delta'] * amount * 100 #TODO: implement options other than multiplicator == 100
-                    except KeyError:
-                        print(y)
-                        print( )
-                        print(self.selected_positions)
-                        print('- - - ')
-                        exit()
-                elif y['contract']['secType'] == 'STK':
-                    delta = amount
-                df['Delta'].append(round(delta, 2))
-                delta_list.append(round(delta, 2))
+                    elif y['contract']['secType'] == 'STK':
+                        delta = amount
+                    df['Delta'].append(round(delta, 2))
+                    delta_list.append(round(delta, 2))
 
-                bwd = beta * delta
-                df['Beta weighted Delta'].append(round(bwd, 2))
-                bwd_list.append(round(bwd, 2))
+                    bwd = beta * delta
+                    df['Beta weighted Delta'].append(round(bwd, 2))
+                    bwd_list.append(round(bwd, 2))
 
-                df['Notional Position'].append(round((self.current_prices[k] * bwd), 2))
-                np_list.append(round((self.current_prices[k] * bwd), 2))
+                    df['Notional Position'].append(round((self.current_prices[k] * bwd), 2))
+                    np_list.append(round((self.current_prices[k] * bwd), 2))
 
-            df['Underlying'].append('')
-            df['Beta / Position'].append('')
+                df['Underlying'].append('')
+                df['Beta / Position'].append('')
+                df['Amount'].append('')
+                df['Delta'].append('')
+                df['Beta weighted Delta'].append('')
+                df['Notional Position'].append('')
+
+            df['Underlying'].append('TOTAL')
+            df['Beta / Position'].append(round(sum(beta_list), 2))
             df['Amount'].append('')
-            df['Delta'].append('')
-            df['Beta weighted Delta'].append('')
-            df['Notional Position'].append('')
+            df['Delta'].append(round(sum(delta_list), 2))
 
-        df['Underlying'].append('TOTAL')
-        df['Beta / Position'].append(round(sum(beta_list), 2))
-        df['Amount'].append('')
-        df['Delta'].append(round(sum(delta_list), 2))
+            for i, x in enumerate(df['Delta']):
+                if df['Delta'][i] == '' and df['Delta'][min(i + 1, len(df['Delta']) - 2)] != '':
+                    total = 0
+                    for y in df['Delta'][i + 1:len(df['Delta']) - 1]:
+                        if isinstance(y, (int, float)):
+                            total += y
+                        else:
+                            break
+                    df['Delta'][i] = round(total, 2)
 
-        for i, x in enumerate(df['Delta']):
-            if df['Delta'][i] == '' and df['Delta'][min(i + 1, len(df['Delta']) - 2)] != '':
-                total = 0
-                for y in df['Delta'][i + 1:len(df['Delta']) - 1]:
-                    if isinstance(y, (int, float)):
-                        total += y
-                    else:
-                        break
-                df['Delta'][i] = round(total, 2)
+            df['Beta weighted Delta'].append(round(sum(bwd_list), 2))
+            for i, x in enumerate(df['Beta weighted Delta']):
+                if df['Beta weighted Delta'][i] == '' and df['Beta weighted Delta'][min(i + 1, len(df['Beta weighted Delta']) - 2)] != '':
+                    total = 0
+                    for y in df['Beta weighted Delta'][i + 1:len(df['Beta weighted Delta']) - 1]:
+                        if isinstance(y, (int, float)):
+                            total += y
+                        else:
+                            break
+                    df['Beta weighted Delta'][i] = round(total, 2)
 
-        df['Beta weighted Delta'].append(round(sum(bwd_list), 2))
-        for i, x in enumerate(df['Beta weighted Delta']):
-            if df['Beta weighted Delta'][i] == '' and df['Beta weighted Delta'][min(i + 1, len(df['Beta weighted Delta']) - 2)] != '':
-                total = 0
-                for y in df['Beta weighted Delta'][i + 1:len(df['Beta weighted Delta']) - 1]:
-                    if isinstance(y, (int, float)):
-                        total += y
-                    else:
-                        break
-                df['Beta weighted Delta'][i] = round(total, 2)
+            df['Notional Position'].append(round(sum(np_list), 2))
+            for i, x in enumerate(df['Delta']):
+                if df['Notional Position'][i] == '' and df['Notional Position'][min(i + 1, len(df['Notional Position']) - 2)] != '':
+                    total = 0
+                    for y in df['Notional Position'][i + 1:len(df['Notional Position']) - 1]:
+                        if isinstance(y, (int, float)):
+                            total += y
+                        else:
+                            break
+                    df['Notional Position'][i] = round(total, 2)
 
-        df['Notional Position'].append(round(sum(np_list), 2))
-        for i, x in enumerate(df['Delta']):
-            if df['Notional Position'][i] == '' and df['Notional Position'][min(i + 1, len(df['Notional Position']) - 2)] != '':
-                total = 0
-                for y in df['Notional Position'][i + 1:len(df['Notional Position']) - 1]:
-                    if isinstance(y, (int, float)):
-                        total += y
-                    else:
-                        break
-                df['Notional Position'][i] = round(total, 2)
+            df = pandas.DataFrame(df)
+            #print('Notional value based on', self.bench_current_price, 'benchmark.')
+            #df.to_csv('bwd_df_dummy.csv', index=False)  # Modify 'your_desired_filename' as needed
 
-        df = pandas.DataFrame(df)
-        #print('Notional value based on', self.bench_current_price, 'benchmark.')
-        print(tabulate(df, headers='keys', tablefmt='psql', floatfmt=('.2f'), numalign='right', stralign='right', showindex=False))
+            self.first_version_printed = True
+            print(tabulate(df, headers='keys', tablefmt='psql', floatfmt=('.2f'), numalign='right', stralign='right', showindex=False))
+
+        except KeyError:
+            return
 
     def main(self):
-        self.get_positions()
-        while not self.download_end:
-            time.sleep(0.1)
-        self.download_end = False
+        while True:
+            if not self.pos_sub_started:
+                self.get_positions()
+                while not self.download_end:
+                    time.sleep(0.1)
+                self.download_end = False
 
-        self.position_selection()
+            self.position_selection()
 
-        self.request_delta()
+            self.request_delta()
 
-        self.calculate_beta()
+            self.calculate_beta()
 
-        self.table()
+            self.table()
+
+            self.pos_sub_started = True
+
+            self.positions = {}
+            while self.positions == {}:
+                time.sleep(10)
+
+            time.sleep(999999)
 
 
 TradingApplication().main()
