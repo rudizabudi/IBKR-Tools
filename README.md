@@ -2,7 +2,7 @@
 Displays consolidated positions and greeks for your single account portfolio. Connects to Trader Workstation / IB Gateway API.
 ## Example
 ### GUI
-![Example GUI](https://i.imgur.com/RBkdbYS.png)
+![Example GUI](https://i.imgur.com/2Zzd9jK.png)
 ## Settings
 ### Customization
 ### TWS API
