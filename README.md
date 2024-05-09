@@ -1,10 +1,8 @@
-# Beta Weighted Deltas
-Calculates beta weighted deltas for your single account portfolio. Connects to Trader Workstation / IB Gateway API.
+# IBKR Positions Dashboard GUI
+Displays consolidated positions and greeks for your single account portfolio. Connects to Trader Workstation / IB Gateway API.
 ## Example
 ### GUI
-![Example GUI](https://i.imgur.com/RBkdbYS.png)
-### Terminal
-![Example Terminal](https://i.imgur.com/8FKIUdS.png)
+![Example GUI](https://i.imgur.com/2Zzd9jK.png)
 ## Settings
 ### Customization
 ### TWS API
