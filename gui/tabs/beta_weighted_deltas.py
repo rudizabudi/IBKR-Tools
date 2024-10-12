@@ -133,7 +133,7 @@ class BetaWeightedDeltas:
 
     def update_selection_list(self, symbol_list: list):
         self.core.item_register['underlying_selection_list'].clear()
-        print(f'Selection table changed with length {len(symbol_list)}')
+        #print(f'Selection table changed with length {len(symbol_list)}')
 
         self.core.item_register['underlying_selection_list'].addItems(symbol_list)
         self.selection_list_change()
