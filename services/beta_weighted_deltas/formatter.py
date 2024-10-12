@@ -70,8 +70,8 @@ class TableContentGenerator:
                 self.table_contents[header['name']][-1][3] = f'{position.get_greeks()['iVol'] * 100:.0f}%'
 
                 delta = position.get_greeks()['delta'] * copysign(1, position.get_pos_size())
-                sum_delta.append(delta * 100)
-                self.table_contents[header['name']][-1][4] = f'{delta * 100:.2f}'
+                sum_delta.append( delta * 100)
+                self.table_contents[header['name']][-1][4] = f'{ delta * 100:.2f}'
 
                 sum_bwd.append(delta * 100 * beta)
                 self.table_contents[header['name']][-1][5] = f'{delta * 100 * beta:.2f}'

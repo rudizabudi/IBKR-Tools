@@ -101,7 +101,6 @@ class BetaWeightedDeltas:
 
     def change_table_content(self):
         if self.previous_selection != self.core.item_register['underlying_selection_list'].currentItem().text():
-
             bwd_table = self.core.item_register['greek_table']
             bwd_table.clear()
 
@@ -134,12 +133,13 @@ class BetaWeightedDeltas:
 
     def update_selection_list(self, symbol_list: list):
         self.core.item_register['underlying_selection_list'].clear()
+        print(f'Selection table changed with length {len(symbol_list)}')
+
         self.core.item_register['underlying_selection_list'].addItems(symbol_list)
         self.selection_list_change()
 
     def selection_list_change(self):
         try:
-            #print('Selection list changed:', self.core.item_register['underlying_selection_list'].currentItem().text())
             self.change_table_content()
         except AttributeError:
             pass

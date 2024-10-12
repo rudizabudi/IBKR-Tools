@@ -11,13 +11,13 @@ type TWSConObj = 'TWSConObj'
 type TCGObj = 'TCGObj'
 
 def build_position_instances(core: CoreObj) -> list[Position]:
+    sleep(5)
     positions = []
     for k in core.raw_positions.keys():
         pos = Position(core=core, **core.raw_positions[k])
         positions.append(pos)
 
     return positions
-
 
 def generate_header_lines(core: CoreObj, positions_str_sorted: list[str]) -> dict[str: HeaderObj]:
     pos_headers = {}
