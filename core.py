@@ -1,16 +1,18 @@
-from datetime import datetime, timedelta
-from typing import TypeVar
-
-from PyQt5.QtCore import pyqtSignal
+from datetime import datetime
 from dotenv import load_dotenv
 import os
 
-load_dotenv('.env')
+from services.contracts import Position
 
 type ContractInstance = 'ContractInstance'
 type SubPageInstance = 'SubPageInstance'
 type QtObj = 'QtObj'
 type QTFunc = 'QTFunc'
+
+if os.getenv('DEV_VAR') == 'rudizabudi':
+    load_dotenv('.env_dev_live')
+else:
+    load_dotenv('.env')
 
 
 class Core:
@@ -34,6 +36,8 @@ class Core:
 
         self.positions: list[ContractInstance] = []
         self.positions_str_sorted: list[str] = []
+
+        self.pos_betas: dict[str: float] = {}
 
         self.table_contents: dict[str: list[str | float]] = {}
 

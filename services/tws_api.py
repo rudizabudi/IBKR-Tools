@@ -17,7 +17,6 @@ class TWSCon(EWrapper, EClient):
 
         self.core = core
         self.core.no_contract = False
-
         self.connect(core.host_ip, core.api_port, core.client_id)
         self.t: threading.Thread = threading.Thread(target=self.run, daemon=True)
         self.t.start()
@@ -31,9 +30,15 @@ class TWSCon(EWrapper, EClient):
         tprint('Disconnected.')
 
     def error(self, reqId, errorCode, errorString):
-        #tprint(errorCode, errorString)
+        #tprint(f'{reqId}, {errorCode}, {errorString}')
         if errorCode in [162, 200]:
             self.core.reqId_hashmap[reqId].__self__.set_error_flag(flag=True)
+
+    def contractDetails(self, reqId: int, contractDetails):
+        if reqId not in self.core.reqId_hashmap.keys():
+            raise KeyError('ReqId not assigned to an security class instance.')
+
+        self.core.reqId_hashmap[reqId](contractDetails.contract.conId)
 
     def managedAccounts(self, accountsList):
         super().managedAccounts(accountsList)
@@ -45,14 +50,28 @@ class TWSCon(EWrapper, EClient):
 
         self.core.reqId_hashmap[reqId](expiries=list(expirations) or [], strikes=list(strikes) or [])
 
-    def contractDetails(self, reqId: int, contractDetails):
-        if reqId not in self.core.reqId_hashmap.keys():
-            raise KeyError('ReqId not assigned to an security class instance.')
-
-        self.core.reqId_hashmap[reqId](contractDetails.contract.conId)
+    def tickOptionComputation(self, reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice):
+        super().tickOptionComputation(reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice)
+        #print('Greeks received')
+        if tickType == 13 and delta is not None:
+            data = {
+                'delta': delta,
+                'gamma': gamma,
+                'theta': theta,
+                'vega': vega,
+                'iVol': impliedVol,
+                'optPrice': optPrice,
+                'undPrice': undPrice
+            }
+            self.core.reqId_hashmap[reqId](data)
 
     def updatePortfolio(self, contract: Contract, position: float, marketPrice: float, marketValue: float, averageCost: float, unrealizedPNL: float, realizedPNL: float, accountName: str):
         #tprint(f'updatePortfolio: {contract.symbol}, {position}, {marketPrice}, {marketValue}, {averageCost}, {unrealizedPNL}, {realizedPNL}, {accountName}')
+
+        # for x in dir(contract):
+        #     tprint(f'{x}: {getattr(contract, x)}')
+        # tprint(' - - - ')
+
         contract = {'symbol': contract.symbol,
                     'secType': contract.secType,
                     'currency': contract.currency,
@@ -70,19 +89,17 @@ class TWSCon(EWrapper, EClient):
             'unrealizedPNL': unrealizedPNL,
             'realizedPNL': realizedPNL}
 
+    def historicalData(self, reqId, bar):
+        #print('HistDataInc', bar)
+        if reqId not in self.core.reqId_hashmap.keys():
+            raise KeyError('ReqId not assigned to an security class instance.')
 
-    def tickOptionComputation(self, reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice):
-        super().tickOptionComputation(reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice)
+        self.core.reqId_hashmap[reqId]({bar.date: {'Open': bar.open, 'High': bar.high, 'Low': bar.low, 'Close': bar.close}})
 
-        if tickType == 13 and delta is not None:
-            data = {
-                'delta': delta,
-                'gamma': gamma,
-                'theta': theta,
-                'vega': vega,
-                'iVol': impliedVol,
-                'optPrice': optPrice,
-                'undPrice': undPrice
-            }
-            self.core.reqId_hashmap[reqId](data)
+    def historicalDataEnd(self, reqId: int, start: str, end: str):
+        super().historicalDataEnd(reqId, start, end)
+        self.core.reqId_hashmap[reqId].__self__.set_historical_data_end(flag=True)
+
+
+
 

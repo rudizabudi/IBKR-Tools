@@ -1,7 +1,8 @@
 from math import copysign
 from statistics import mean
 
-type PositionObj = 'PositionObj'
+
+type Position = 'Position'
 
 def generate_selection_list(positions):
     if positions:
@@ -17,7 +18,7 @@ class TableContentGenerator:
 
         self.table_contents = core.table_contents
 
-    def generate_position_cells(self, header: dict[str: str | float], positions: list[PositionObj]):
+    def generate_position_cells(self, header: dict[str: str | float], positions: list[Position]):
 
         def add_empty_row():
             self.table_contents[header['name']].append([])
@@ -69,7 +70,7 @@ class TableContentGenerator:
                 avg_ivol.append(position.get_greeks()['iVol'])
                 self.table_contents[header['name']][-1][3] = f'{position.get_greeks()['iVol'] * 100:.0f}%'
 
-                delta = position.get_greeks()['delta'] * copysign(1, position.get_pos_size())
+                delta = position.get_greeks()['delta'] * copysign(position.get_pos_size(), position.get_pos_size())
                 sum_delta.append( delta * 100)
                 self.table_contents[header['name']][-1][4] = f'{ delta * 100:.2f}'
 
@@ -93,7 +94,7 @@ class TableContentGenerator:
         self.table_contents[header['name']][0][5] = f'{sum(sum_bwd):.2f}'
         self.table_contents[header['name']][0][6] = f'{sum(sum_theta) * 100:.2f}'
         self.table_contents[header['name']][0][7] = f'{sum(l_gamma) * 100:.2f} | {sum(s_gamma) * 100:.2f}'
-        self.table_contents[header['name']][0][8] = f'{sum(not_pos):,.0f}'
+        self.table_contents[header['name']][0][8] = f'{sum(not_pos):,.2f}'
 
         # for x in self.table_contents[header['name']]:
         #     print(x)

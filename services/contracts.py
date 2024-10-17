@@ -5,7 +5,7 @@ type ContractObj = 'ContractObj'
 
 
 class Position:
-    def __init__(self, core, symbol: str = None, **kwargs):
+    def __init__(self, core, **kwargs):
         self.core = core
 
         # KWARGS
@@ -18,7 +18,7 @@ class Position:
         self.contract = ibContract()
         self.contract.symbol = kwargs['contract']['symbol']
         self.contract.secType = kwargs['contract']['secType']
-        self.contract.exchange = 'SMART'
+        self.contract.exchange = kwargs['contract'].get('exchange', 'SMART')
         self.contract.currency = kwargs['contract']['currency']
         if kwargs['contract']['secType'] in ('OPT', 'FOP'):
             self.contract.right = kwargs['contract']['right']
@@ -29,7 +29,8 @@ class Position:
 
         self.symbol = self.contract.symbol
         self.greeks = {}
-
+        self.price_data = {}
+        self.historical_data_end = False
 
     def __str__(self) -> str:
         match self.contract.secType:
@@ -51,6 +52,9 @@ class Position:
     def get_contract(self) -> ContractObj:
         return self.contract
 
+    def get_currency(self) -> str:
+        return self.contract.currency
+
     def get_expiry(self, dt_object: bool = False, output_str_format: str = '%Y%m%d', ** kwargs) -> datetime | str | None:
         if self.contract.secType not in ('OPT', 'FOP'):
             raise Exception(f'Expiry date only available for contract instances of secType OPT. Requested {self.contract.symbol} of type {self.contract.secType}.')
@@ -69,14 +73,14 @@ class Position:
     def get_price(self) -> float:
         return self.marketPrice
 
+    def get_qty(self) -> float:
+        return self.position
+
     def get_secType(self) -> str:
         return self.contract.secType
 
     def get_symbol(self) -> str:
         return self.symbol
-
-    def set_beta(self, beta: float):
-        self.greeks['beta'] = beta
 
     def set_error_flag(self, flag: bool = False, **kwargs):
         print(f'Error flag {flag}')
@@ -85,12 +89,17 @@ class Position:
     def set_greeks(self, greeks: dict):
         self.greeks = {k: v for k, v in greeks.items()}
 
-    def set_reqId_assign(self, reqId: int, reqType: str, ** kwargs):
-        match reqType:
-            case 'reqMktData':
-                self.core.reqId_hashmap[reqId] = self.set_greeks
-            case _:
-                raise AttributeError('Invalid reqType. Valid options: reqMktData')
+    def get_price_data(self) -> dict[datetime: list[float]]:
+        return self.price_data
+
+    def set_price_data(self, prices: dict[datetime: list[float]]):
+        self.price_data.update(prices)
+
+    def set_historical_data_end(self, flag: bool = False, **kwargs):
+        self.historical_data_end = flag
+
+    def get_historical_data_end(self, **kwargs) -> bool:
+        return self.historical_data_end
 
 
 class Header:
