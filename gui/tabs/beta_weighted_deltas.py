@@ -100,6 +100,8 @@ class BetaWeightedDeltas:
         return self.core.item_register
 
     def change_table_content(self):
+        # TODO: Add sorting via 1 or 2 selection fields: sort by and ASC/DESC(?)
+        #   Alternative: Sort via column header clisk
         if self.previous_selection != self.core.item_register['underlying_selection_list'].currentItem().text():
             bwd_table = self.core.item_register['greek_table']
             bwd_table.clear()

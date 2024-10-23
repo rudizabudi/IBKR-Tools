@@ -8,17 +8,18 @@ type ContractInstance = 'ContractInstance'
 type SubPageInstance = 'SubPageInstance'
 type QtObj = 'QtObj'
 type QTFunc = 'QTFunc'
+load_dotenv('.env_dev_live')
 
 if os.getenv('DEV_VAR') == 'rudizabudi':
     load_dotenv('.env_dev_live')
 else:
     load_dotenv('.env')
 
-
 class Core:
     def __init__(self):
         self.host_ip: str = os.getenv('HOST_IP')
         self.api_port: int = int(os.getenv('API_PORT'))
+        #self.api_port: int = 7491
         self.client_id: int = int(os.getenv('CLIENT_ID'))
         self.account_id: str | None = os.getenv('ACCOUNT_ID') # TODO: Add selection popup if no account_Id provided
         self.benchmark: str = os.getenv('BENCHMARK')

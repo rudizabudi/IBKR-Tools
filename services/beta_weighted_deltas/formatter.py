@@ -47,7 +47,7 @@ class TableContentGenerator:
             self.table_contents[header['name']][-1][1] = underlying.generate_name()
             self.table_contents[header['name']][-1][2] = underlying.get_pos_size()
 
-            delta = self.table_contents[header['name']][-1][2] * copysign(1, self.table_contents[header['name']][-1][2])
+            delta = self.table_contents[header['name']][-1][2]
             sum_delta.append(delta)
             self.table_contents[header['name']][-1][4] = f'{delta:,.2f}'
             sum_bwd.append(delta * beta)
@@ -59,14 +59,12 @@ class TableContentGenerator:
         else:
             underlying_price = self.core.underlying_prices[header['name']]
 
-        #TODO: Sort OPT contracts
         for position in positions:
             if position != underlying:
                 add_empty_row()
                 self.table_contents[header['name']][-1][1] = position.generate_name()
 
                 self.table_contents[header['name']][-1][2] = f'{position.get_pos_size():.0f}'
-
                 avg_ivol.append(position.get_greeks()['iVol'])
                 self.table_contents[header['name']][-1][3] = f'{position.get_greeks()['iVol'] * 100:.0f}%'
 
@@ -94,7 +92,7 @@ class TableContentGenerator:
         self.table_contents[header['name']][0][5] = f'{sum(sum_bwd):.2f}'
         self.table_contents[header['name']][0][6] = f'{sum(sum_theta) * 100:.2f}'
         self.table_contents[header['name']][0][7] = f'{sum(l_gamma) * 100:.2f} | {sum(s_gamma) * 100:.2f}'
-        self.table_contents[header['name']][0][8] = f'{sum(not_pos):,.2f}'
+        self.table_contents[header['name']][0][8] = f'{sum(not_pos):,.0f}'
 
         # for x in self.table_contents[header['name']]:
         #     print(x)
@@ -114,7 +112,7 @@ class TableContentGenerator:
             theta_sum.append(float(self.table_contents[header][0][6]))
             gamma_sum_positive.append(float(self.table_contents[header][0][7].split(' | ')[0]))
             gamma_sum_negative.append(float(self.table_contents[header][0][7].split(' | ')[1]))
-            not_pos_sum.append(int(self.table_contents[header][0][8].replace(',', '')))
+            not_pos_sum.append(float(self.table_contents[header][0][8].replace(',', '')))
 
         self.total_line[0] = f'TOTAL'
         self.total_line[1] = f'{mean(beta_avg):.2f}'

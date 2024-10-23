@@ -129,8 +129,8 @@ def filter_positions(positions: list[Position]) -> list[Position]:
                                 positions))
     if filter_types: positions = filter_supported_types()
 
-    def filter_zero_qty():
-        return list(filter(lambda x: x.get_qty() > 0, positions))
+    def filter_supported_types():
+        return list(filter(lambda x: x.get_qty() != 0, positions))
     if filter_qty: positions = filter_supported_types()
 
     return positions
