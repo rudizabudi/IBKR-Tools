@@ -13,6 +13,7 @@ class Position:
         #  'position': -1.0, 'marketPrice': 0.59565555, 'marketValue': -59.57, 'averageCost': 35.2929, 'unrealizedPNL': -24.27, 'realizedPNL': 0.0}
 
         for key in list(kwargs.keys())[1:]:
+            #print(key, kwargs[key])
             setattr(self, key, kwargs[key])
 
         self.contract = ibContract()
@@ -67,6 +68,9 @@ class Position:
     def get_greeks(self) -> dict[str: float]:
         return self.greeks
 
+    def get_identifier(self) -> dict[str: int | str]:
+        return {'name': self.generate_name(), 'pos': self.position}
+
     def get_pos_size(self) -> str:
         return self.position
 
@@ -87,6 +91,7 @@ class Position:
         self.error_flag = flag
 
     def set_greeks(self, greeks: dict):
+        #print(f'Set greeks {greeks} for {self.symbol} {self.generate_name()}')
         self.greeks = {k: v for k, v in greeks.items()}
 
     def get_price_data(self) -> dict[datetime: list[float]]:
