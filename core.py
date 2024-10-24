@@ -22,7 +22,14 @@ class Core:
         #self.api_port: int = 7491
         self.client_id: int = int(os.getenv('CLIENT_ID'))
         self.account_id: str | None = os.getenv('ACCOUNT_ID') # TODO: Add selection popup if no account_Id provided
+
         self.benchmark: str = os.getenv('BENCHMARK')
+        self.bench_pos: ContractInstance = Position(core=self, **{'contract': {
+                                                                        'symbol': self.benchmark,
+                                                                        'secType': 'STK',
+                                                                        'currency': 'USD',
+                                                                        'exchange': 'SMART'
+                                                                    }})
         self.beta_period: str = os.getenv('BETA_PERIOD')
 
         self.reqId_hashmap: dict = {}
@@ -51,5 +58,5 @@ class Core:
         self.TWSCon = TWSCon
 
 
-def tprint(text: str = '', *args, **kwargs) -> str:
+def tprint(text: str = '', *args, **kwargs):
     print(f'{datetime.now().strftime('%H:%M:%S')} : {text}')
