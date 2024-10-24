@@ -75,7 +75,7 @@ class TableContentGenerator:
                     avg_ivol.append(0)
                     self.table_contents[header['name']][-1][3] = f'{0 * 100:.0f}%'
 
-                    print(f'KeyError:Position {position.generate_name()} has no IVOL')
+                    print(f'KeyError:Position {position.generate_name()} has no IVOL', position.get_greeks())
 
                 delta = position.get_greeks()['delta'] * copysign(position.get_pos_size(), position.get_pos_size())
                 sum_delta.append( delta * 100)
