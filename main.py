@@ -15,6 +15,7 @@ if __name__ == "__main__":
     tester = False
 
     core = core.Core()
+
     def gui():
         app = QApplication([])
         app = skin.set_skin(app)
