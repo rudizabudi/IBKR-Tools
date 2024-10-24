@@ -96,7 +96,7 @@ class TableContentGenerator:
                 not_pos.append(delta * underlying_price * 100)
                 self.table_contents[header['name']][-1][8] = f'{delta * underlying_price * 100:,.0f}'
 
-        self.table_contents[header['name']][0][3] = f'{mean(avg_ivol) * 100:.0f}%'
+        if len(avg_ivol) > 0: self.table_contents[header['name']][0][3] = f'{mean(avg_ivol) * 100:.0f}%'
         self.table_contents[header['name']][0][4] = f'{sum(sum_delta):.2f}'
         self.table_contents[header['name']][0][5] = f'{sum(sum_bwd):.2f}'
         self.table_contents[header['name']][0][6] = f'{sum(sum_theta) * 100:.2f}'
