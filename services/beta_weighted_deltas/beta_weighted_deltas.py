@@ -16,12 +16,13 @@ def build_position_instances(core: CoreObj, old_positions: list[Position]) -> li
     old_identifiers = [x.get_identifier() for x in old_positions]
     for k in core.raw_positions.keys():
         pos = Position(core=core, **core.raw_positions[k])
-        if pos.get_identifier() in old_identifiers:
-            positions.append(list(filter(lambda x: x.get_identifier() == pos.get_identifier(), old_positions))[0])
-            print('Keep old position.')
-        else:
-            positions.append(pos)
-            print('Add new position.')
+        if pos.get_secType() in ['STL', 'OPT']: #TODO: Properly handle unsupported secTypes
+            if pos.get_identifier() in old_identifiers:
+                positions.append(list(filter(lambda x: x.get_identifier() == pos.get_identifier(), old_positions))[0])
+                print('Keep old position.')
+            else:
+                positions.append(pos)
+                print('Add new position.')
 
     return positions
 
