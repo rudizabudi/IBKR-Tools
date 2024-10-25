@@ -77,21 +77,21 @@ class TableContentGenerator:
 
                     print(f'KeyError:Position {position.generate_name()} has no IVOL', position.get_greeks())
 
-                delta = position.get_greeks()['delta'] * copysign(position.get_pos_size(), position.get_pos_size())
-                sum_delta.append( delta * 100)
-                self.table_contents[header['name']][-1][4] = f'{ delta * 100:.2f}'
+                delta = position.get_greeks()['delta'] * position.get_pos_size() * 100
+                sum_delta.append(delta)
+                self.table_contents[header['name']][-1][4] = f'{delta:.2f}'
 
-                sum_bwd.append(delta * 100 * beta)
-                self.table_contents[header['name']][-1][5] = f'{delta * 100 * beta:.2f}'
+                sum_bwd.append(delta * beta)
+                self.table_contents[header['name']][-1][5] = f'{delta * beta:.2f}'
 
-                sum_theta.append(position.get_greeks()['theta'])
-                self.table_contents[header['name']][-1][6] = f'{position.get_greeks()['theta'] * 100:.2f}'
+                sum_theta.append(position.get_greeks()['theta'] * position.get_pos_size() * 100)
+                self.table_contents[header['name']][-1][6] = f'{position.get_greeks()['theta'] * position.get_pos_size() * 100:.2f}'
 
                 if (' Call ' in position.generate_name() and position.get_pos_size() > 0) or (' Put ' in position.generate_name() and position.get_pos_size() < 0):
-                    l_gamma.append(position.get_greeks()['gamma'])
+                    l_gamma.append(position.get_greeks()['gamma'] * position.get_pos_size() * 100)
                 elif (' Call ' in position.generate_name() and position.get_pos_size() < 0) or (' Put ' in position.generate_name() and position.get_pos_size() > 0):
-                    s_gamma.append(position.get_greeks()['gamma'])
-                self.table_contents[header['name']][-1][7] = f'{position.get_greeks()['gamma'] * 100:.2f}'
+                    s_gamma.append(position.get_greeks()['gamma'] * position.get_pos_size() * 100)
+                self.table_contents[header['name']][-1][7] = f'{position.get_greeks()['gamma'] * position.get_pos_size() * 100:.2f}'
 
                 not_pos.append(delta * underlying_price * 100)
                 self.table_contents[header['name']][-1][8] = f'{delta * underlying_price * 100:,.0f}'
@@ -99,7 +99,7 @@ class TableContentGenerator:
         if len(avg_ivol) > 0: self.table_contents[header['name']][0][3] = f'{mean(avg_ivol) * 100:.0f}%'
         self.table_contents[header['name']][0][4] = f'{sum(sum_delta):.2f}'
         self.table_contents[header['name']][0][5] = f'{sum(sum_bwd):.2f}'
-        self.table_contents[header['name']][0][6] = f'{sum(sum_theta) * 100:.2f}'
+        self.table_contents[header['name']][0][6] = f'{sum(sum_theta):.2f}'
         self.table_contents[header['name']][0][7] = f'{sum(l_gamma) * 100:.2f} | {sum(s_gamma) * 100:.2f}'
         self.table_contents[header['name']][0][8] = f'{sum(not_pos):,.0f}'
 
