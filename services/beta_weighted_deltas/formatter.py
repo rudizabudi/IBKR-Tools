@@ -100,7 +100,7 @@ class TableContentGenerator:
         self.table_contents[header['name']][0][4] = f'{sum(sum_delta):.2f}'
         self.table_contents[header['name']][0][5] = f'{sum(sum_bwd):.2f}'
         self.table_contents[header['name']][0][6] = f'{sum(sum_theta):.2f}'
-        self.table_contents[header['name']][0][7] = f'{sum(l_gamma) * 100:.2f} | {sum(s_gamma) * 100:.2f}'
+        self.table_contents[header['name']][0][7] = f'{sum(l_gamma):.2f} | {sum(s_gamma):.2f}'
         self.table_contents[header['name']][0][8] = f'{sum(not_pos):,.0f}'
 
         # for x in self.table_contents[header['name']]:
