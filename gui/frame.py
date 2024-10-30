@@ -1,60 +1,87 @@
-from PyQt5.QtWidgets import (
-    QAbstractItemView,
-    QHBoxLayout,
-    QLabel,
-    QListWidget,
-    QMainWindow,
-    QPushButton,
-    QSizePolicy,
-    QTableWidget,
-    QVBoxLayout,
-    QWidget, QStyleOptionTab)
+import os
+from PySide6.QtWidgets import QMainWindow, QHeaderView
 
-from PyQt5.QtWidgets import QTabWidget
+#from gui.modules.ui_functions import UIFunctions
 from gui.tabs.beta_weighted_deltas import BetaWeightedDeltas
-
-
+from gui.modules.ui_main import Ui_MainWindow
+from gui.app_settings import Settings
 type CoreObj = 'CoreObj'
+
+os.environ["QT_FONT_DPI"] = "96"
+
+widgets = None
+
 # noinspection PyUnresolvedReferences
 class MainWindow(QMainWindow):
 
     def __init__(self, core: CoreObj):
-        super().__init__()
+        QMainWindow.__init__(self)
 
-        self.core = core
+        #self.core = core
+        #
+        # self.bwd: BetaWeightedDeltas = BetaWeightedDeltas(core=self.core)
 
-        self.bwd: BetaWeightedDeltas = BetaWeightedDeltas(core=self.core)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
 
-        self.core.frame_tabs = {'Beta Weighted Deltas': self.bwd,}
+        global widgets
+        widgets = self.ui
 
-        self.tabs = QTabWidget()
-        self.frame_box = QVBoxLayout()
-        self.central_widget = QWidget()
+        # USE CUSTOM TITLE BAR | USE AS "False" FOR MAC OR LINUX
+        Settings.ENABLE_CUSTOM_TITLE_BAR = True
 
+        title = "IBKR Tools - GUI"
+        description = "IBKR Tools - GUI"
+        self.setWindowTitle(title)
+        widgets.titleRightInfo.setText(description)
 
-    def create_gui(self):
+        widgets.toggleButton.clicked.connect(lambda: UIFunctions.toggleMenu(self, True))
+        from gui.modules.ui_functions import UIFunctions
+        UIFunctions.uiDefinitions(self)
 
-        self.setWindowTitle(f'IBKR Tools')
-        self.setGeometry(25, 40, 1250, 1250)
+        widgets.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-        for k in self.core.frame_tabs.keys():
-            self.tabs.addTab(QWidget(), k)
+        # CLICK EVENTS
+        widgets.btn_home.clicked.connect(self.buttonClick)
+        widgets.btn_widgets.clicked.connect(self.buttonClick)
 
-        self.tabs.setStyleSheet("QTabBar::tab { height: 25px; width: 200px; font-size: 18px}")
-        self.tabs.setFixedHeight(25)
-        self.frame_box.addWidget(self.tabs)
+        self.show()
 
-        self.central_widget.setLayout(self.frame_box)
-        self.setCentralWidget(self.central_widget)
+        useCustomTheme = False
+        themeFile = "themes\py_dracula_light.qss"
 
-        self.tabs.currentChanged.connect(self.change_tab)
-        self.change_tab()
+        if useCustomTheme:
+            UIFunctions.theme(self, themeFile, True)
+            AppFunctions.setThemeHack(self)
 
-    def change_tab(self):
+        widgets.stackedWidget.setCurrentWidget(widgets.home)
+        widgets.btn_home.setStyleSheet(UIFunctions.selectMenu(widgets.btn_home.styleSheet()))
 
-        tab_name = self.tabs.tabText(self.tabs.currentIndex())
-        self.core.active_tab = tab_name
-        tab = self.core.frame_tabs[tab_name]
-        self.frame_box.addWidget(tab.get_tab_element())
+    def buttonClick(self):
+        btn = self.sender()
+        btnName = btn.objectName()
 
-        tab.update_time_now()
+        # SHOW HOME PAGE
+        match btnName:
+            case "btn_home":
+                widgets.stackedWidget.setCurrentWidget(widgets.home)
+                UIFunctions.resetStyle(self, btnName)
+                btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
+
+            # SHOW WIDGETS PAGE
+            case "btn_widgets":
+                widgets.stackedWidget.setCurrentWidget(widgets.beta_weighted_deltas)
+                UIFunctions.resetStyle(self, btnName)
+                btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
+
+            # SHOW NEW PAGE
+            case "btn_new":
+                widgets.stackedWidget.setCurrentWidget(widgets.new_page)  # SET PAGE
+                UIFunctions.resetStyle(self, btnName)  # RESET ANOTHERS BUTTONS SELECTED
+                btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))  # SELECT MENU
+
+            case _:
+                ...
+
+        # PRINT BTN NAME
+        print(f'Button "{btnName}" pressed!')

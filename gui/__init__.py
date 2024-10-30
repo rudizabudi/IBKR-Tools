@@ -1,1 +1,2 @@
-from custom_grips import CustomGrip
+from .custom_grips import CustomGrip
+print(123)

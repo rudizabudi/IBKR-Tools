@@ -1,28 +1,32 @@
+from PySide6.QtGui import QIcon
 from ibapi.contract import Contract
 from time import sleep
-from PyQt5.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
+import sys
 from threading import Thread
 
 import core
-from gui import frame, skin
+from gui.frame import MainWindow
 from services import controller
 
 
 if __name__ == "__main__":
     start_gui = True
-    start_tws_inst = True
-    start_tws_loop = True
+    start_tws_inst = False
+    start_tws_loop = False
     tester = False
 
     core = core.Core()
 
     def gui():
-        app = QApplication([])
-        app = skin.set_skin(app)
-        window = frame.MainWindow(core=core)
-        window.create_gui()
-        window.show()
-        app.exec_()
+        app = QApplication(sys.argv)
+        app.setWindowIcon(QIcon("icon.ico"))
+        window = MainWindow(core=core)
+        sys.exit(app.exec())
+
+        # window.create_gui()
+        # window.show()
+        # app.exec_()
 
     if start_gui:
         Thread(target=gui).start()

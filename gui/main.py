@@ -18,8 +18,6 @@ import sys
 import os
 import platform
 
-# IMPORT / GUI AND MODULES AND WIDGETS
-# ///////////////////////////////////////////////////////////////
 
 from modules import *
 from custom_grips import CustomGrip
@@ -165,3 +163,4 @@ if __name__ == "__main__":
     app.setWindowIcon(QIcon("icon.ico"))
     window = MainWindow()
     sys.exit(app.exec_())
+    print('Postexec')
