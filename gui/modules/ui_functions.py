@@ -10,8 +10,6 @@ GLOBAL_STATE = False
 GLOBAL_TITLE_BAR = True
 
 class UIFunctions(MainWindow):
-    # MAXIMIZE/RESTORE
-    # ///////////////////////////////////////////////////////////////
     def maximize_restore(self):
         global GLOBAL_STATE
         status = GLOBAL_STATE
@@ -264,5 +262,4 @@ class UIFunctions(MainWindow):
             self.top_grip.setGeometry(0, 0, self.width(), 10)
             self.bottom_grip.setGeometry(0, self.height() - 10, self.width(), 10)
 
-    # ///////////////////////////////////////////////////////////////
-    # END - GUI DEFINITIONS
+

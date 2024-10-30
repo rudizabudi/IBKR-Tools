@@ -34,7 +34,6 @@ class MainWindow(QMainWindow):
         description = "IBKR Tools - GUI"
         self.setWindowTitle(title)
         widgets.titleRightInfo.setText(description)
-
         widgets.toggleButton.clicked.connect(lambda: UIFunctions.toggleMenu(self, True))
         from gui.modules.ui_functions import UIFunctions
         UIFunctions.uiDefinitions(self)
