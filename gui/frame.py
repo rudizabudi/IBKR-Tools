@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QMainWindow, QHeaderView
 from gui.tabs.beta_weighted_deltas import BetaWeightedDeltas
 from gui.modules.ui_main import Ui_MainWindow
 from gui.app_settings import Settings
+
 type CoreObj = 'CoreObj'
 
 os.environ["QT_FONT_DPI"] = "96"
@@ -35,7 +36,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(title)
         widgets.titleRightInfo.setText(description)
         widgets.toggleButton.clicked.connect(lambda: UIFunctions.toggleMenu(self, True))
-        from gui.modules.ui_functions import UIFunctions
+        #from gui.modules.ui_functions import UIFunctions
         UIFunctions.uiDefinitions(self)
 
         widgets.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -84,3 +85,6 @@ class MainWindow(QMainWindow):
 
         # PRINT BTN NAME
         print(f'Button "{btnName}" pressed!')
+
+
+from gui.modules.ui_functions import UIFunctions
