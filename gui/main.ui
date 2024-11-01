@@ -850,7 +850,7 @@ Button */
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="btn_widgets">
+                 <widget class="QPushButton" name="btn_bwd">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -996,21 +996,39 @@ Button */
                 <enum>QFrame::Raised</enum>
                </property>
                <layout class="QHBoxLayout" name="horizontalLayout_3">
-                <property name="spacing">
-                 <number>0</number>
-                </property>
-                <property name="leftMargin">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <property name="rightMargin">
-                 <number>0</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>0</number>
-                </property>
+                <item>
+                 <widget class="QLabel" name="last_udpate_label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>45</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Segoe UI</family>
+                    <pointsize>10</pointsize>
+                    <italic>false</italic>
+                    <bold>false</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>IBKR Tools</string>
+                  </property>
+                  <property name="textFormat">
+                   <enum>Qt::AutoText</enum>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
                 <item>
                  <widget class="QLabel" name="titleRightInfo">
                   <property name="sizePolicy">
@@ -1034,7 +1052,10 @@ Button */
                    </font>
                   </property>
                   <property name="text">
-                   <string>IBKR Tools</string>
+                   <string>Not yet updated.</string>
+                  </property>
+                  <property name="textFormat">
+                   <enum>Qt::AutoText</enum>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1098,7 +1119,7 @@ Button */
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="resources.qrc">
+                   <iconset resource="../../IBKR-Tools_UI_TEST/resources.qrc">
                     <normaloff>:/icons/images/icons/icon_minimize.png</normaloff>:/icons/images/icons/icon_minimize.png</iconset>
                   </property>
                   <property name="iconSize">
@@ -1142,7 +1163,7 @@ Button */
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="resources.qrc">
+                   <iconset resource="../../IBKR-Tools_UI_TEST/resources.qrc">
                     <normaloff>:/icons/images/icons/icon_maximize.png</normaloff>:/icons/images/icons/icon_maximize.png</iconset>
                   </property>
                   <property name="iconSize">
@@ -1177,7 +1198,7 @@ Button */
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="resources.qrc">
+                   <iconset resource="../../IBKR-Tools_UI_TEST/resources.qrc">
                     <normaloff>:/icons/images/icons/icon_close.png</normaloff>:/icons/images/icons/icon_close.png</iconset>
                   </property>
                   <property name="iconSize">
@@ -1271,6 +1292,12 @@ Button */
                    </property>
                    <item>
                     <widget class="QStackedWidget" name="stackedWidget">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="styleSheet">
                       <string notr="true">background: transparent;</string>
                      </property>
@@ -1315,7 +1342,7 @@ background-repeat: no-repeat;</string>
                           <property name="frameShadow">
                            <enum>QFrame::Raised</enum>
                           </property>
-                          <widget class="QListWidget" name="listWidget">
+                          <widget class="QListWidget" name="bwd_listWidget">
                            <property name="geometry">
                             <rect>
                              <x>0</x>
@@ -1335,13 +1362,13 @@ background-repeat: no-repeat;</string>
                           <property name="frameShadow">
                            <enum>QFrame::Raised</enum>
                           </property>
-                          <widget class="QTableWidget" name="tableWidget">
+                          <widget class="QTableWidget" name="bwd_tableWidget">
                            <property name="geometry">
                             <rect>
                              <x>0</x>
                              <y>0</y>
                              <width>1156</width>
-                             <height>299</height>
+                             <height>591</height>
                             </rect>
                            </property>
                            <property name="sizePolicy">
@@ -1577,7 +1604,7 @@ background-repeat: no-repeat;</string>
                             <bool>false</bool>
                            </property>
                            <attribute name="horizontalHeaderVisible">
-                            <bool>false</bool>
+                            <bool>true</bool>
                            </attribute>
                            <attribute name="horizontalHeaderCascadingSectionResizes">
                             <bool>true</bool>
@@ -1625,84 +1652,49 @@ background-repeat: no-repeat;</string>
                              <string>New Row</string>
                             </property>
                            </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
-                           <row>
-                            <property name="text">
-                             <string>New Row</string>
-                            </property>
-                           </row>
                            <column>
                             <property name="text">
-                             <string>0</string>
+                             <string>Underlying</string>
                             </property>
                            </column>
                            <column>
                             <property name="text">
-                             <string>1</string>
+                             <string>β Beta / Position</string>
                             </property>
                            </column>
                            <column>
                             <property name="text">
-                             <string>2</string>
+                             <string>Qty</string>
                             </property>
                            </column>
                            <column>
                             <property name="text">
-                             <string>3</string>
+                             <string>iVol</string>
+                            </property>
+                           </column>
+                           <column>
+                            <property name="text">
+                             <string>δ Delta</string>
+                            </property>
+                           </column>
+                           <column>
+                            <property name="text">
+                             <string>Beta weighted deltas</string>
+                            </property>
+                           </column>
+                           <column>
+                            <property name="text">
+                             <string>θ Theta</string>
+                            </property>
+                           </column>
+                           <column>
+                            <property name="text">
+                             <string>γ Gamma (L|S)</string>
+                            </property>
+                           </column>
+                           <column>
+                            <property name="text">
+                             <string>Notional position</string>
                             </property>
                            </column>
                            <item row="0" column="0">
@@ -2067,7 +2059,7 @@ background-repeat: no-repeat;</string>
   </widget>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../../IBKR-Tools_UI_TEST/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

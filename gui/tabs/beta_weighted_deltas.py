@@ -12,21 +12,14 @@ type QtObj = 'QtObj'
 class BetaWeightedDeltas:
     def __init__(self, core: CoreObj):
 
-        self.core = core
+        self.core: CoreObj = core
         self.table_contents = core.table_contents
-
-        self.bwd_site = QWidget()
-
-        self.bwd_box = QHBoxLayout()
-        self.content_box = QVBoxLayout()
-
-        self.bwd_site.setLayout(self.bwd_box)
 
         self._widget_built_finished: bool = False
 
         self.previous_selection: None | str = None
 
-        self.core.bwd_update_refresh = self.update_time_now
+        self.symbol_list: list = ['Loading...']
 
     def build_widget(self):
         def underlying_selection_list() -> QListWidget:
@@ -89,21 +82,21 @@ class BetaWeightedDeltas:
 
         self._widget_built_finished = True
 
-    def get_tab_element(self) -> QWidget:
-        if not self._widget_built_finished:
-            self.build_widget()
-            self._widget_built_finished = True
-
-        return self.bwd_site
-
-    def get_item_register(self) -> dict[str: QtObj]:
-        return self.core.item_register
+    def tab_trigger(self):
+        print('bwd tab triggered')
+    def get_widget_object(self, selection_list: bool = False, greek_table: bool = False):
+        if all([selection_list, greek_table]):
+            raise Exception('Only one of selection_list or greek_table can be True.')
+        elif selection_list:
+            return self.core.widget_registry['beta_weighted_deltas']['selection_list']
+        elif greek_table:
+            return self.core.widget_registry['beta_weighted_deltas']['greek_table']
 
     def change_table_content(self):
         # TODO: Add sorting via 1 or 2 selection fields: sort by and ASC/DESC(?)
-        #   Alternative: Sort via column header clisk
+        # Alternative: Sort via column header clisk
         if self.previous_selection != self.core.item_register['underlying_selection_list'].currentItem().text():
-            bwd_table = self.core.item_register['greek_table']
+            bwd_table = self.get_widget_object(greek_table=True)
             bwd_table.clear()
 
             selection = self.core.item_register['underlying_selection_list'].currentItem().text()
@@ -134,17 +127,21 @@ class BetaWeightedDeltas:
         self.core.item_register['update_label'].setText(f'Last update:  {datetime.now().strftime('%H:%M')}')
 
     def update_selection_list(self, symbol_list: list):
-        self.core.item_register['underlying_selection_list'].clear()
+        bwd_selection_list = self.get_widget_object(selection_list=True)
+        bwd_selection_list.clear()
         #print(f'Selection table changed with length {len(symbol_list)}')
-
-        self.core.item_register['underlying_selection_list'].addItems(symbol_list)
-        self.selection_list_change()
+        print(f'symbol list: {symbol_list}')
+        bwd_selection_list.addItems(symbol_list)
+        #self.selection_list_change()
 
     def selection_list_change(self):
         try:
             self.change_table_content()
         except AttributeError:
             pass
+
+    def set_symbol_list(self, symbol_list: list):
+        self.symbol_list = symbol_list
 
 
 

@@ -28,14 +28,13 @@ class TWSRequests:
         startup = {'BWD': True}
         positions = []
         while True:
-            # if activa_tab == BWD
-            get_portfolio_positions(core=self.core, tws_api=self.tws_api)
+            if self.core.active_tab == 'beta_weighted_deltas':
+                get_portfolio_positions(core=self.core, tws_api=self.tws_api)
             sleep(5)
 
             positions = build_position_instances(core=self.core, old_positions=positions)
 
             positions = filter_positions(positions=positions)  # TODO: Add support for further types
-
             positions_str_sorted = update_selection_list(core=self.core, positions=positions)
 
             calculate_beta(positions=positions, core=self.core, tws_api=self.tws_api)
@@ -48,13 +47,11 @@ class TWSRequests:
 
             generate_table_strings(tcg=tcg, pos_headers=pos_headers, positions=positions)
 
-            # if activa_tab == BWD
-            if startup['BWD']:
-                self.core.item_register['underlying_selection_list'].setCurrentRow(0)
-                startup['BWD'] = False
-
-            self.core.bwd_update_refresh()
-            sleep(60)
+            # # if activa_tab == BWD
+            # if startup['BWD']:
+            #     self.core.item_register['underlying_selection_list'].setCurrentRow(0)
+            #     startup['BWD'] = False
+            #
 
 
 

@@ -122,7 +122,7 @@ def request_historical_data(core: CoreObj, tws_api: TWSConObj, position: Positio
 
 def update_selection_list(core: CoreObj, positions: list[Position]) -> list[str]:
     positions_str_sorted = generate_selection_list(positions)
-    core.frame_tabs['Beta Weighted Deltas'].update_selection_list(positions_str_sorted)
+    core.tab_data_registry['beta_weighted_deltas'].update_selection_list(positions_str_sorted)
     return positions_str_sorted
 
 

@@ -22,7 +22,6 @@ class TWSCon(EWrapper, EClient):
         self.t.start()
         time.sleep(1)
 
-
     def connectAck(self):
         tprint('Connected.')
 
@@ -66,7 +65,7 @@ class TWSCon(EWrapper, EClient):
             self.core.reqId_hashmap[reqId](data)
 
     def updatePortfolio(self, contract: Contract, position: float, marketPrice: float, marketValue: float, averageCost: float, unrealizedPNL: float, realizedPNL: float, accountName: str):
-        #tprint(f'updatePortfolio: {contract.symbol}, {position}, {marketPrice}, {marketValue}, {averageCost}, {unrealizedPNL}, {realizedPNL}, {accountName}')
+        tprint(f'updatePortfolio: {contract.symbol}, {position}, {marketPrice}, {marketValue}, {averageCost}, {unrealizedPNL}, {realizedPNL}, {accountName}')
 
         # for x in dir(contract):
         #     tprint(f'{x}: {getattr(contract, x)}')

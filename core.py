@@ -6,6 +6,7 @@ from services.contracts import Position
 
 type ContractInstance = 'ContractInstance'
 type SubPageInstance = 'SubPageInstance'
+type DataHandlerInstance = 'DataHandlerInstance'
 type QtObj = 'QtObj'
 type QTFunc = 'QTFunc'
 load_dotenv('.env_dev_live')
@@ -20,6 +21,7 @@ class Core:
         self.host_ip: str = os.getenv('HOST_IP')
         self.api_port: int = int(os.getenv('API_PORT'))
         #self.api_port: int = 7491
+
         self.client_id: int = int(os.getenv('CLIENT_ID'))
         self.account_id: str | None = os.getenv('ACCOUNT_ID') # TODO: Add selection popup if no account_Id provided
 
@@ -53,6 +55,9 @@ class Core:
         self.underlying_prices: dict[str: float] = {}
 
         self.bwd_update_refresh: QTFunc = None
+
+        self.widget_registry: dict[str: dict[str: QtObj]] = {}
+        self.tab_data_registry: dict[str: dict[str: DataHandlerInstance] | DataHandlerInstance] = {}
 
     def set_TWSCon(self, TWSCon):
         self.TWSCon = TWSCon

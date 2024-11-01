@@ -12,8 +12,8 @@ from services import controller
 
 if __name__ == "__main__":
     start_gui = True
-    start_tws_inst = False
-    start_tws_loop = False
+    start_tws_inst = True
+    start_controller_loop = True
     tester = False
 
     core = core.Core()
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     def gui():
         app = QApplication(sys.argv)
         app.setWindowIcon(QIcon("icon.ico"))
-        window = MainWindow(core=core)
+        MainWindow(core=core)
         sys.exit(app.exec())
 
         # window.create_gui()
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     def tws_loop(tws_con):
         tws_con.control_loop()
 
-    if start_tws_loop:
+    if start_controller_loop:
         tws_loop(tws_con)
 
     def test_lab(tws_con):
