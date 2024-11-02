@@ -87,7 +87,6 @@ def get_portfolio_positions(core: CoreObj, tws_api: TWSConObj):
     while not core.raw_positions:
         sleep(.1)
 
-
 def request_position_greeks(core: CoreObj, tws_api: TWSConObj, positions: list[Position]):
     for pos in positions:
         contract = pos.get_contract()
