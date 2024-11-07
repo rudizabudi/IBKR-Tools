@@ -93,8 +93,8 @@ class TableContentGenerator:
                     s_gamma.append(position.get_greeks()['gamma'] * position.get_pos_size() * 100)
                 self.table_contents[header['name']][-1][7] = f'{position.get_greeks()['gamma'] * position.get_pos_size() * 100:.2f}'
 
-                not_pos.append(delta * underlying_price * 100)
-                self.table_contents[header['name']][-1][8] = f'{delta * underlying_price * 100:,.0f}'
+                not_pos.append(delta * underlying_price)
+                self.table_contents[header['name']][-1][8] = f'{delta * underlying_price:,.0f}'
 
         if len(avg_ivol) > 0: self.table_contents[header['name']][0][3] = f'{mean(avg_ivol) * 100:.0f}%'
         self.table_contents[header['name']][0][4] = f'{sum(sum_delta):.2f}'

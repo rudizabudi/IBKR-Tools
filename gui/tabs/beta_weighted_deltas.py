@@ -1,7 +1,7 @@
 from datetime import datetime
 from time import sleep
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QListWidget, QHBoxLayout, QWidget, QTableWidget, QSizePolicy, QAbstractItemView, QVBoxLayout, QLabel, QTableWidgetItem
 
@@ -48,7 +48,7 @@ class BetaWeightedDeltas:
 
             column_ratios = {0: 3,
                              1: 7,
-                             2: 2,
+                             2: 3,
                              3: 3,
                              4: 4,
                              5: 7,
@@ -86,7 +86,6 @@ class BetaWeightedDeltas:
         bwd_table = self.get_widget_object(greek_table=True)
         bwd_table.clearContents()
 
-
     def get_widget_object(self, selection_list: bool = False, greek_table: bool = False):
         if all([selection_list, greek_table]):
             raise Exception('Only one of selection_list or greek_table can be True.')
@@ -98,13 +97,12 @@ class BetaWeightedDeltas:
     def change_table_content(self):
         # TODO: Add sorting via 1 or 2 selection fields: sort by and ASC/DESC(?)
         # Alternative: Sort via column header clisk
-        print(123)
 
-        if self.previous_selection != self.core.widget_registry['beta_weighted_deltas']['selection_list'] .currentItem().text():
+        if self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem() and self.previous_selection != self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem().text():
             bwd_table = self.get_widget_object(greek_table=True)
             bwd_table.clear()
 
-            selection = self.core.widget_registry['beta_weighted_deltas']['selection_list'] .currentItem().text()
+            selection = self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem().text()
             while selection not in self.core.table_contents.keys():
                 sleep(.01)
 
@@ -123,23 +121,37 @@ class BetaWeightedDeltas:
 
                     bwd_table.setItem(i, j, item)
 
+
             headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', 'γ Gamma (L|S)', 'Notional position']
             bwd_table.setHorizontalHeaderLabels(headers)
-
+            bwd_table.horizontalHeader().setFont(QFont(self.core.project_font, 9))
             self.previous_selection = selection
 
     def update_time_now(self):
         self.core.item_register['update_label'].setText(f'Last update:  {datetime.now().strftime('%H:%M')}')
 
-    def update_selection_list(self, symbol_list: list):
+    def refresh_selection_list(self, symbol_list: list):
+        if self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem():
+            selection = self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem().text()
+        else:
+            selection = None
+
         bwd_selection_list = self.get_widget_object(selection_list=True)
         bwd_selection_list.clear()
-
+        print('Symbol list:', len(symbol_list))
         bwd_selection_list.addItems(symbol_list)
 
         for i in range(bwd_selection_list.count()):
-            bwd_selection_list.item(i).setFont(QFont('', 14))
+            bwd_selection_list.item(i).setFont(QFont(self.core.project_font, 16))
+            #bwd_selection_list.item(i).setFont(QFont('', 14))
         #self.selection_list_change()
+
+
+        if selection in symbol_list:
+            bwd_selection_list.setCurrentRow(symbol_list.index(selection))
+        else:
+            bwd_selection_list.setCurrentRow(0)
+
 
     def selection_list_change(self):
         try:

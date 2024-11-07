@@ -59,6 +59,8 @@ class Core:
         self.widget_registry: dict[str: dict[str: QtObj]] = {}
         self.tab_data_registry: dict[str: dict[str: DataHandlerInstance] | DataHandlerInstance] = {}
 
+        self.project_font = None
+
     def set_TWSCon(self, TWSCon):
         self.TWSCon = TWSCon
 

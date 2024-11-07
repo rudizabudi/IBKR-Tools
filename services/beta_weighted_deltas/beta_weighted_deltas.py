@@ -19,10 +19,10 @@ def build_position_instances(core: CoreObj, old_positions: list[Position]) -> li
         if pos.get_secType() in ['STK', 'OPT']: #TODO: Properly handle unsupported secTypes
             if pos.get_identifier() in old_identifiers:
                 positions.append(list(filter(lambda x: x.get_identifier() == pos.get_identifier(), old_positions))[0])
-                print('Keep old position.')
+                #print('Keep old position.')
             else:
                 positions.append(pos)
-                print('Add new position.')
+                #print('Add new position.')
 
     return positions
 
@@ -121,7 +121,7 @@ def request_historical_data(core: CoreObj, tws_api: TWSConObj, position: Positio
 
 def update_selection_list(core: CoreObj, positions: list[Position]) -> list[str]:
     positions_str_sorted = generate_selection_list(positions)
-    core.tab_data_registry['beta_weighted_deltas'].update_selection_list(positions_str_sorted)
+    core.tab_data_registry['beta_weighted_deltas'].refresh_selection_list(positions_str_sorted)
     return positions_str_sorted
 
 

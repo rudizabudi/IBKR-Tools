@@ -10,6 +10,9 @@ from gui.frame import MainWindow
 from services import controller
 
 
+import faulthandler
+faulthandler.enable()
+
 if __name__ == "__main__":
     start_gui = True
     start_tws_inst = True
@@ -19,6 +22,7 @@ if __name__ == "__main__":
     core = core.Core()
 
     def gui():
+
         app = QApplication(sys.argv)
         app.setWindowIcon(QIcon("icon.ico"))
         MainWindow(core=core)

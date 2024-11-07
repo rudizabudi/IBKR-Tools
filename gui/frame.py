@@ -1,5 +1,6 @@
 import os
 from PySide6.QtWidgets import QMainWindow, QHeaderView, QSizePolicy, QAbstractItemView
+from PySide6.QtGui import QFontDatabase, QFont
 
 #from gui.modules.ui_functions import UIFunctions
 from gui.tabs.beta_weighted_deltas import BetaWeightedDeltas
@@ -30,11 +31,10 @@ class MainWindow(QMainWindow):
         # USE CUSTOM TITLE BAR | USE AS "False" FOR MAC OR LINUX
         Settings.ENABLE_CUSTOM_TITLE_BAR = True
 
-        title = "IBKR Tools - GUI"
-        description = "IBKR Tools - GUI"
-        self.setWindowTitle(title)
-        widgets.titleRightInfo.setText(description)
+        self.setWindowTitle("IBKR Tools")
 
+        widgets.titleRightInfo.setText('')
+        widgets.last_udpate_label.setText('IBKR Tools - GUI')
         UIFunctions.uiDefinitions(self)
 
         widgets.bwd_tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -74,6 +74,7 @@ class MainWindow(QMainWindow):
             def bwd_table():
                 headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', ' γ Gamma (L|S)', 'Notional position']
                 widgets.bwd_tableWidget.setHorizontalHeaderLabels(headers)
+                widgets.bwd_tableWidget.horizontalHeader().setFont(QFont(self.core.project_font, 9))
 
                 #widgets.bwd_tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
                 widgets.bwd_tableWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -82,7 +83,7 @@ class MainWindow(QMainWindow):
 
                 column_ratios = {0: 3,
                                  1: 7,
-                                 2: 2,
+                                 2: 3,
                                  3: 3,
                                  4: 4,
                                  5: 7,
@@ -96,6 +97,23 @@ class MainWindow(QMainWindow):
 
             bwd_table()
         adjust_widgets()
+
+        def set_fonts():
+            font_id = QFontDatabase.addApplicationFont(os.path.join(os.getcwd(), 'gui\\fonts\\Aquire-BW0ox.otf'))
+            if font_id == -1:
+                raise Exception("Failed to load the custom font.")
+            else:
+                self.core.project_font = QFontDatabase.applicationFontFamilies(font_id)[0]
+
+            #self.setFont(QFont(self.core.project_font, 12))
+
+            widgets.titleRightInfo.setFont(QFont(self.core.project_font, 12))
+            widgets.last_udpate_label.setFont(QFont(self.core.project_font, 12))
+            widgets.btn_home.setFont(QFont(self.core.project_font, 8))
+            widgets.btn_bwd.setFont(QFont(self.core.project_font, 8))
+            widgets.toggleButton.setFont(QFont(self.core.project_font, 8))
+
+        set_fonts()
 
     def buttonClick(self):
         btn = self.sender()

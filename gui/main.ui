@@ -21,14 +21,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="styleSheet">
-   <property name="font">
-    <font>
-     <family>Segoe UI</family>
-     <pointsize>10</pointsize>
-     <italic>false</italic>
-     <bold>false</bold>
-    </font>
-   </property>
    <property name="styleSheet">
     <string notr="true">/* /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +31,7 @@ DARK THEME - DRACULA COLOR BASED
 
 QWidget{
 	color: rgb(221, 221, 221);
-	font: 10pt &quot;Segoe UI&quot;;
+
 }
 
 /* /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -720,7 +712,7 @@ Button */
               </font>
              </property>
              <property name="text">
-              <string>Modern GUI / Flat Style</string>
+              <string/>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -1512,11 +1504,16 @@ background-repeat: no-repeat;</string>
                            </property>
                            <property name="font">
                             <font>
-                             <family>Segoe UI</family>
-                             <pointsize>10</pointsize>
+                             <family>Titillium Web</family>
+                             <pointsize>14</pointsize>
                              <italic>false</italic>
                              <bold>false</bold>
                             </font>
+                           </property>
+                           <property name="styleSheet">
+                            <string notr="true">QListWidget::item {
+    padding: 3px;
+}</string>
                            </property>
                           </widget>
                          </widget>
