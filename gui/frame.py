@@ -145,4 +145,14 @@ class MainWindow(QMainWindow):
         #print(f'Active tab: {tab_name}')
         self.core.active_tab = tab_name
 
+    def mousePressEvent(self, event):
+        # SET DRAG POS WINDOW
+        self.dragPos = event.globalPos()
+
+        # PRINT MOUSE EVENTS
+        # if event.buttons() == Qt.LeftButton:
+        #     print('Mouse click: LEFT CLICK')
+        # if event.buttons() == Qt.RightButton:
+        #     print('Mouse click: RIGHT CLICK')
+
 from gui.modules.ui_functions import UIFunctions

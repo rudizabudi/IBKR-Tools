@@ -1,9 +1,9 @@
 from datetime import datetime
 from time import sleep
 
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QItemSelectionModel, QTimer
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QListWidget, QHBoxLayout, QWidget, QTableWidget, QSizePolicy, QAbstractItemView, QVBoxLayout, QLabel, QTableWidgetItem
+from PySide6.QtWidgets import QListWidget, QHBoxLayout, QWidget, QTableWidget, QSizePolicy, QAbstractItemView, QVBoxLayout, QLabel, QTableWidgetItem, QApplication
 
 type CoreObj = 'CoreObj'
 type QtObj = 'QtObj'
@@ -96,13 +96,13 @@ class BetaWeightedDeltas:
 
     def change_table_content(self):
         # TODO: Add sorting via 1 or 2 selection fields: sort by and ASC/DESC(?)
-        # Alternative: Sort via column header clisk
-
+        # Alternative: Sort via column header click
         if self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem() and self.previous_selection != self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem().text():
             bwd_table = self.get_widget_object(greek_table=True)
             bwd_table.clear()
 
             selection = self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem().text()
+            print(f'Selection from bwd_table check: {selection}')
             while selection not in self.core.table_contents.keys():
                 sleep(.01)
 
@@ -131,26 +131,35 @@ class BetaWeightedDeltas:
         self.core.item_register['update_label'].setText(f'Last update:  {datetime.now().strftime('%H:%M')}')
 
     def refresh_selection_list(self, symbol_list: list):
-        if self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem():
-            selection = self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem().text()
+
+        bwd_selection_list = self.get_widget_object(selection_list=True)
+        bwd_selection_list.blockSignals(True)
+
+        if bwd_selection_list.currentItem():
+            selection = bwd_selection_list.currentItem().text()
         else:
             selection = None
 
-        bwd_selection_list = self.get_widget_object(selection_list=True)
         bwd_selection_list.clear()
-        print('Symbol list:', len(symbol_list))
         bwd_selection_list.addItems(symbol_list)
 
         for i in range(bwd_selection_list.count()):
             bwd_selection_list.item(i).setFont(QFont(self.core.project_font, 16))
-            #bwd_selection_list.item(i).setFont(QFont('', 14))
-        #self.selection_list_change()
 
-
+        # Manage re-selection or default selection
         if selection in symbol_list:
-            bwd_selection_list.setCurrentRow(symbol_list.index(selection))
+            while not bwd_selection_list.currentItem() or bwd_selection_list.currentItem().text() != selection:
+                try:
+                    index = symbol_list.index(selection)
+                    bwd_selection_list.setCurrentRow(index)  # Set intended selection
+                    sleep(.1)
+                except AttributeError:
+                    continue
         else:
-            bwd_selection_list.setCurrentRow(0)
+            bwd_selection_list.setCurrentRow(0)  # Default selection
+
+        bwd_selection_list.blockSignals(False)  # Re-enable signals
+
 
 
     def selection_list_change(self):

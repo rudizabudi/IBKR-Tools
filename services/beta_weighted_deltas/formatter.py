@@ -115,7 +115,10 @@ class TableContentGenerator:
 
         for header in self.table_contents:
             beta_avg.append(float(self.table_contents[header][0][1]))
-            ivol_avg.append(int(self.table_contents[header][0][3][:-1]))
+            try:
+                ivol_avg.append(int(self.table_contents[header][0][3][:-1]))
+            except TypeError:
+                print('IVOL Error:', self.table_contents[header][0][3][:-1])
             delta_sum.append(float(self.table_contents[header][0][4]))
             bwd_sum.append(float(self.table_contents[header][0][5]))
             theta_sum.append(float(self.table_contents[header][0][6]))

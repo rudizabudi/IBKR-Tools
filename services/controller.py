@@ -47,6 +47,9 @@ class TWSRequests:
 
             generate_table_strings(tcg=tcg, pos_headers=pos_headers, positions=positions)
 
+            self.core.tab_data_registry['beta_weighted_deltas'].change_table_content()
+
+
             # # if activa_tab == BWD
             # if startup['BWD']:
             #     self.core.item_register['underlying_selection_list'].setCurrentRow(0)
