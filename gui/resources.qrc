@@ -2,8 +2,11 @@
   <qresource prefix="images">
     <file>images/images/PyDracula.png</file>
     <file>images/images/PyDracula_vertical.png</file>
+    <file>images/images/ibkr_tools_logo.png</file>
   </qresource>
   <qresource prefix="icons">
+    <file>images/icons/custom_bwd.png</file>
+    <file>images/icons/bwd_icon.png</file>
     <file>images/icons/cil-3d.png</file>
     <file>images/icons/cil-4k.png</file>
     <file>images/icons/cil-account-logout.png</file>
