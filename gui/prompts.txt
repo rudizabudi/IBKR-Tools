@@ -1,2 +1,0 @@
-pyside6-uic main.ui -o modules/ui_main.py
-pyside6-rcc resources.qrc -o modules/resources_rc.py
