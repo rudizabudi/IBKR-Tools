@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from ibapi.contract import Contract as ibContract
 
 type ContractObj = 'ContractObj'
@@ -40,6 +41,9 @@ class Position:
             case 'OPT':
                 dt_s: str = datetime.strptime(self.contract.lastTradeDateOrContractMonth, "%Y%m%d").strftime("%d%b%y")
                 return f'<Data Container Instance> {self.contract.symbol} {self.contract.strike}{self.contract.right} {dt_s} {self.contract.secType}'
+
+    def __repr__(self):
+        return self.__str__()
 
     def generate_name(self) -> str:
         match self.contract.secType:

@@ -14,13 +14,11 @@
 #
 # ///////////////////////////////////////////////////////////////
 
-import sys
 import os
-import platform
-
+import sys
 
 from modules import *
-from custom_grips import CustomGrip
+
 os.environ["QT_FONT_DPI"] = "96" # FIX Problem for High DPI and Scale above 100%
 
 # SET AS GLOBAL WIDGETS
@@ -30,7 +28,7 @@ widgets = None
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-
+        print("Gui Main")
         # SET AS GLOBAL WIDGETS
         # ///////////////////////////////////////////////////////////////
         self.ui = Ui_MainWindow()

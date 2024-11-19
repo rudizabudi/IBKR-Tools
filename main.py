@@ -1,19 +1,20 @@
-from PySide6.QtGui import QIcon
-from ibapi.contract import Contract
-from time import sleep
-from PySide6.QtWidgets import QApplication
+import faulthandler
 import sys
 from threading import Thread
+from time import sleep
+
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication
+from ibapi.contract import Contract
 
 import core
 from gui.frame import MainWindow
 from services import controller
 
-
-import faulthandler
 faulthandler.enable()
 
 if __name__ == "__main__":
+
     start_gui = True
     start_tws_inst = True
     start_controller_loop = True

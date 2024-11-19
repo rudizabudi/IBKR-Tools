@@ -1,9 +1,9 @@
-from ibapi.client import EClient
-from ibapi.wrapper import EWrapper
-from ibapi.contract import Contract
 import threading
-
 import time
+
+from ibapi.client import EClient
+from ibapi.contract import Contract
+from ibapi.wrapper import EWrapper
 
 from core import tprint
 
@@ -98,6 +98,10 @@ class TWSCon(EWrapper, EClient):
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         super().historicalDataEnd(reqId, start, end)
         self.core.reqId_hashmap[reqId].__self__.set_historical_data_end(flag=True)
+
+    def accountDownloadEnd(self, accountName: str):
+        super().accountDownloadEnd(accountName)
+        print("AccountDownloadEnd. Account:", accountName)
 
 
 

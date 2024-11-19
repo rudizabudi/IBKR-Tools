@@ -1,9 +1,9 @@
 from datetime import datetime
 from time import sleep
 
-from PySide6.QtCore import Qt, QSize, QItemSelectionModel, QTimer
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QListWidget, QHBoxLayout, QWidget, QTableWidget, QSizePolicy, QAbstractItemView, QVBoxLayout, QLabel, QTableWidgetItem, QApplication
+from PySide6.QtWidgets import QListWidget, QLabel, QTableWidgetItem
 
 type CoreObj = 'CoreObj'
 type QtObj = 'QtObj'
@@ -36,32 +36,32 @@ class BetaWeightedDeltas:
 
             return list_widget
 
-        def greek_table() -> QTableWidget:
-            table = QTableWidget(1000, 9)
-            table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            table.setMinimumSize(1020, 1230)
-            headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', ' γ Gamma (L|S)', 'Notional position']
-            table.setHorizontalHeaderLabels(headers)
-
-            table.setSelectionMode(QAbstractItemView.NoSelection)
-            table.verticalHeader().setVisible(False)
-
-            column_ratios = {0: 3,
-                             1: 7,
-                             2: 3,
-                             3: 3,
-                             4: 4,
-                             5: 7,
-                             6: 4,
-                             7: 6,
-                             8: 5}
-
-            for k, v in column_ratios.items():
-                width = int(round((table.width() / sum(column_ratios.values())) * v * .98, 0))
-                table.setColumnWidth(k, width)
-
-            self.core.item_register['greek_table'] = table
-            return table
+        # def greek_table() -> QTableWidget:
+        #     table = QTableWidget(1000, 9)
+        #     table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        #     table.setMinimumSize(1020, 1230)
+        #     headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', ' γ Gamma (L|S)', 'Notional position']
+        #     table.setHorizontalHeaderLabels(headers)
+        #
+        #     table.setSelectionMode(QAbstractItemView.NoSelection)
+        #     table.verticalHeader().setVisible(False)
+        #
+        #     column_ratios = {0: 3,
+        #                      1: 7,
+        #                      2: 3,
+        #                      3: 3,
+        #                      4: 4,
+        #                      5: 7,
+        #                      6: 4,
+        #                      7: 6,
+        #                      8: 5}
+        #
+        #     for k, v in column_ratios.items():
+        #         width = int(round((table.width() / sum(column_ratios.values())) * v * .98, 0))
+        #         table.setColumnWidth(k, width)
+        #
+        #     self.core.item_register['greek_table'] = table
+        #     return table
 
         def update_label() -> QLabel:
             label = QLabel()
@@ -97,7 +97,8 @@ class BetaWeightedDeltas:
     def change_table_content(self):
         # TODO: Add sorting via 1 or 2 selection fields: sort by and ASC/DESC(?)
         # Alternative: Sort via column header click
-        if self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem() and self.previous_selection != self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem().text():
+
+        if self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem():
             bwd_table = self.get_widget_object(greek_table=True)
             bwd_table.clear()
 

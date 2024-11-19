@@ -1,7 +1,7 @@
 import os
 
 from PySide6.QtGui import QFontDatabase, QFont
-from PySide6.QtWidgets import QMainWindow, QHeaderView, QSizePolicy, QAbstractItemView
+from PySide6.QtWidgets import QMainWindow, QHeaderView, QSizePolicy, QAbstractItemView, QTableWidgetItem
 
 from gui.app_settings import Settings
 from gui.modules.ui_main import Ui_MainWindow
@@ -100,6 +100,13 @@ class MainWindow(QMainWindow):
                 widgets.bwd_tableWidget.setColumnWidth(k, width)
 
             widgets.bwd_tableWidget.horizontalHeader().setFont(QFont(self.core.project_font, 9))
+
+            for _ in range(998):
+                row_position = widgets.bwd_tableWidget.rowCount()
+                widgets.bwd_tableWidget.insertRow(row_position)
+
+                for column in range(widgets.bwd_tableWidget.columnCount()):
+                    widgets.bwd_tableWidget.setItem(row_position, column, QTableWidgetItem(''))
 
         bwd_table()
 
