@@ -30,10 +30,10 @@ class TWSRequests:
         while True:
             #if self.core.active_tab == 'beta_weighted_deltas':
             get_portfolio_positions(core=self.core, tws_api=self.tws_api)
-            sleep(5)
+            sleep(10)
 
             positions = build_position_instances(core=self.core, old_positions=positions)
-            #print(f'Positions: {positions}')
+            print(f'Positions: {positions}')
             positions = filter_positions(positions=positions)  # TODO: Add support for further types
             #print(' . . . . ')
             #print(f'Filtered positions: {positions}')
