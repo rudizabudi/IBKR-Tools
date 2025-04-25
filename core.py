@@ -1,11 +1,15 @@
-from datetime import datetime
-from dotenv import load_dotenv
 import os
+import threading
+from dataclasses import dataclass
+from datetime import datetime
 
-from services.contracts import Position
+from dotenv import load_dotenv
+
+#from services.contracts import Position
 
 type ContractInstance = 'ContractInstance'
 type SubPageInstance = 'SubPageInstance'
+type DataHandlerInstance = 'DataHandlerInstance'
 type QtObj = 'QtObj'
 type QTFunc = 'QTFunc'
 load_dotenv('.env_dev_live')
@@ -16,46 +20,59 @@ else:
     load_dotenv('.env')
 
 class Core:
-    def __init__(self):
-        self.host_ip: str = os.getenv('HOST_IP')
-        self.api_port: int = int(os.getenv('API_PORT'))
-        #self.api_port: int = 7491
-        self.client_id: int = int(os.getenv('CLIENT_ID'))
-        self.account_id: str | None = os.getenv('ACCOUNT_ID') # TODO: Add selection popup if no account_Id provided
+    def __init__(self, thread_id):
+        self.thread_id = thread_id
 
-        self.benchmark: str = os.getenv('BENCHMARK')
-        self.bench_pos: ContractInstance = Position(core=self, **{'contract': {
-                                                                        'symbol': self.benchmark,
-                                                                        'secType': 'STK',
-                                                                        'currency': 'USD',
-                                                                        'exchange': 'SMART'
-                                                                    }})
-        self.beta_period: str = os.getenv('BETA_PERIOD')
+    host_ip: str = os.getenv('HOST_IP')
+    api_port: int = int(os.getenv('API_PORT'))
 
-        self.reqId_hashmap: dict = {}
-        self.reqId: int = 1
+    client_id: int = int(os.getenv('CLIENT_ID'))
+    account_id: str | None = os.getenv('ACCOUNT_ID') # TODO: Add selection popup if no account_Id provided
 
-        self.account_list: list[str] = []
+    benchmark: str = os.getenv('BENCHMARK')
+    beta_period: str = os.getenv('BETA_PERIOD')
 
-        self.frame_tabs: dict[str: SubPageInstance] = {}
-        self.active_tab: str = ''
+    reqId_hashmap: dict = {}
+    reqId: int = 1
 
-        self.raw_positions: dict[str, dict[str: any]] = {}
+    account_list: list[str] = []
 
-        self.positions: list[ContractInstance] = []
-        self.positions_str_sorted: list[str] = []
+    active_tab: str = ''
 
-        self.pos_betas: dict[str: float] = {}
+    raw_positions: dict[str, dict[str, any]] = {}
 
-        self.table_contents: dict[str: list[str | float]] = {}
+    positions: list[ContractInstance] = []
+    positions_str_sorted: list[str] = []
 
-        self.item_register: dict[str: QtObj] = {}
-        self.underlying_prices: dict[str: float] = {}
+    pos_betas: dict[str: float] = {}
 
-        self.bwd_update_refresh: QTFunc = None
+    table_contents: dict[str: list[str | float]] = {}
 
-    def set_TWSCon(self, TWSCon):
-        self.TWSCon = TWSCon
+    item_register: dict[str: QtObj] = {}
+    underlying_prices: dict[str: float] = {}
+
+    bwd_update_refresh: QTFunc = None
+
+    widget_registry: dict[str: dict[str: QtObj]] = {}
+    tab_instances: dict[str: dict[str: DataHandlerInstance] | DataHandlerInstance] = {}
+
+    project_font = None
+
+    @classmethod
+    def set_TWSCon(cls, TWSCon):
+        cls.TWSCon = TWSCon
+
+@dataclass
+class CoreDistributor:
+    _local = threading.local()
+
+    @classmethod
+    def get_core(cls):
+        current_thread_id = threading.get_ident()
+
+        if not hasattr(cls._local, 'core_instance'):
+            cls._local.core_instance = Core(current_thread_id)
+        return cls._local.core_instance
 
 
 def tprint(text: str = '', *args, **kwargs):

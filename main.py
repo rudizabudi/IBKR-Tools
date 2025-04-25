@@ -1,34 +1,43 @@
-from ibapi.contract import Contract
-from time import sleep
-from PyQt5.QtWidgets import QApplication
+import faulthandler
+import sys
 from threading import Thread
+from time import sleep
 
-import core
-from gui import frame, skin
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication
+from ibapi.contract import Contract
+
+from core import Core, CoreDistributor
+from gui.frame import MainWindow
 from services import controller
 
+faulthandler.enable()
 
 if __name__ == "__main__":
+    core: Core = CoreDistributor.get_core()
+
     start_gui = True
     start_tws_inst = True
-    start_tws_loop = True
+    start_controller_loop = True
     tester = False
 
-    core = core.Core()
 
     def gui():
-        app = QApplication([])
-        app = skin.set_skin(app)
-        window = frame.MainWindow(core=core)
-        window.create_gui()
-        window.show()
-        app.exec_()
+
+        app = QApplication(sys.argv)
+        app.setWindowIcon(QIcon("icon.ico"))
+        MainWindow()
+        sys.exit(app.exec())
+
+        # window.create_gui()
+        # window.show()
+        # app.exec_()
 
     if start_gui:
         Thread(target=gui).start()
 
     def tws_con():
-        return controller.TWSRequests(core=core)
+        return controller.TWSRequests()
 
     if start_tws_inst:
         tws_con = tws_con()
@@ -36,7 +45,7 @@ if __name__ == "__main__":
     def tws_loop(tws_con):
         tws_con.control_loop()
 
-    if start_tws_loop:
+    if start_controller_loop:
         tws_loop(tws_con)
 
     def test_lab(tws_con):

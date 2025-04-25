@@ -1,27 +1,27 @@
-from ibapi.client import EClient
-from ibapi.wrapper import EWrapper
-from ibapi.contract import Contract
 import threading
-
 import time
 
+from ibapi.client import EClient
+from ibapi.contract import Contract
+from ibapi.wrapper import EWrapper
+
+from core import Core, CoreDistributor
 from core import tprint
 
 
 class TWSCon(EWrapper, EClient):
 
-    def __init__(self, core):
+    def __init__(self):
 
         super().__init__()
         EClient.__init__(self, wrapper=self)
 
-        self.core = core
+        self.core: Core = CoreDistributor.get_core()
         self.core.no_contract = False
-        self.connect(core.host_ip, core.api_port, core.client_id)
+        self.connect(self.core.host_ip, self.core.api_port, self.core.client_id)
         self.t: threading.Thread = threading.Thread(target=self.run, daemon=True)
         self.t.start()
         time.sleep(1)
-
 
     def connectAck(self):
         tprint('Connected.')
@@ -99,6 +99,10 @@ class TWSCon(EWrapper, EClient):
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         super().historicalDataEnd(reqId, start, end)
         self.core.reqId_hashmap[reqId].__self__.set_historical_data_end(flag=True)
+
+    def accountDownloadEnd(self, accountName: str):
+        super().accountDownloadEnd(accountName)
+        print("AccountDownloadEnd. Account:", accountName)
 
 
 

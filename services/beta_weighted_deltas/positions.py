@@ -1,34 +1,24 @@
 from datetime import datetime
+
 from ibapi.contract import Contract as ibContract
 
-type ContractObj = 'ContractObj'
+from core import Core, CoreDistributor
+from services.beta_weighted_deltas.contracts import create_benchmark_contract, create_position_contract
 
 
 class Position:
-    def __init__(self, core, **kwargs):
-        self.core = core
+    def __init__(self, benchmark: bool = False, **kwargs):
+        self.core: Core = CoreDistributor.get_core()
 
-        # KWARGS
-        # {'contract': {'symbol': 'VALE', 'secType': 'OPT', 'currency': 'USD', 'right': 'C', 'strike': 10.5, 'lastTradeDateOrContractMonth': '20241025', 'conId': 727068884},
-        #  'position': -1.0, 'marketPrice': 0.59565555, 'marketValue': -59.57, 'averageCost': 35.2929, 'unrealizedPNL': -24.27, 'realizedPNL': 0.0}
+        if benchmark:
+            self.contract: ibContract = create_benchmark_contract()
+        else:
+            self.contract: ibContract = create_position_contract(**kwargs['contract'])
 
-        for key in list(kwargs.keys())[1:]:
-            #print(key, kwargs[key])
-            setattr(self, key, kwargs[key])
+        self.symbol: str = self.contract.symbol
+        self.qty: int | float = kwargs.get('position', 0.0)
+        self.market_price: int | float = kwargs.get('marketPrice', 0.0)
 
-        self.contract = ibContract()
-        self.contract.symbol = kwargs['contract']['symbol']
-        self.contract.secType = kwargs['contract']['secType']
-        self.contract.exchange = kwargs['contract'].get('exchange', 'SMART')
-        self.contract.currency = kwargs['contract']['currency']
-        if kwargs['contract']['secType'] in ('OPT', 'FOP'):
-            self.contract.right = kwargs['contract']['right']
-            self.contract.strike = float(kwargs['contract']['strike'])
-            self.contract.lastTradeDateOrContractMonth = kwargs['contract']['lastTradeDateOrContractMonth']
-            if kwargs['contract']['secType'] == 'FOP':
-                self.contract.multiplier = "50"
-
-        self.symbol = self.contract.symbol
         self.greeks = {}
         self.price_data = {}
         self.historical_data_end = False
@@ -40,6 +30,11 @@ class Position:
             case 'OPT':
                 dt_s: str = datetime.strptime(self.contract.lastTradeDateOrContractMonth, "%Y%m%d").strftime("%d%b%y")
                 return f'<Data Container Instance> {self.contract.symbol} {self.contract.strike}{self.contract.right} {dt_s} {self.contract.secType}'
+            case _:
+                raise Exception(f'Contract type {self.contract.secType} not supported.')
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def generate_name(self) -> str:
         match self.contract.secType:
@@ -50,7 +45,7 @@ class Position:
             case _:
                 raise Exception(f'Contract type {self.contract.secType} not supported.')
 
-    def get_contract(self) -> ContractObj:
+    def get_contract(self) -> ibContract:
         return self.contract
 
     def get_currency(self) -> str:
@@ -65,20 +60,17 @@ class Position:
         else:
             return dt.strftime(output_str_format)
 
-    def get_greeks(self) -> dict[str: float]:
+    def get_greeks(self) -> dict[str, float]:
         return self.greeks
 
-    def get_identifier(self) -> dict[str: int | str]:
-        return {'name': self.generate_name(), 'pos': self.position}
+    def get_identifier(self) -> dict[str, int | float | str]:
+        return {'name': self.generate_name(), 'pos': self.qty}
 
-    def get_pos_size(self) -> str:
-        return self.position
+    def get_qty(self) -> int | float:
+        return self.qty
 
     def get_price(self) -> float:
-        return self.marketPrice
-
-    def get_qty(self) -> float:
-        return self.position
+        return self.market_price
 
     def get_secType(self) -> str:
         return self.contract.secType
@@ -94,10 +86,10 @@ class Position:
         #print(f'Set greeks {greeks} for {self.symbol} {self.generate_name()}')
         self.greeks = {k: v for k, v in greeks.items()}
 
-    def get_price_data(self) -> dict[datetime: list[float]]:
+    def get_price_data(self) -> dict[str, dict[str, float]]:
         return self.price_data
 
-    def set_price_data(self, prices: dict[datetime: list[float]]):
+    def set_price_data(self, prices: dict[str, dict[str, float]]):
         self.price_data.update(prices)
 
     def set_historical_data_end(self, flag: bool = False, **kwargs):
@@ -106,24 +98,5 @@ class Position:
     def get_historical_data_end(self, **kwargs) -> bool:
         return self.historical_data_end
 
-
-class Header:
-    def __init__(self, core, symbol: str = None, **kwargs):
-        self.core = core
-        self.symbol = symbol
-
-        self.beta = None
-
-    def add_position(self, position: Position):
-        self.positions.append(position)
-
-    def set_beta(self, beta: float):
-        self.beta = beta
-
-    def generate_name(self) -> str:
-        return self.symbol
-
-    def get_beta(self) -> float:
-        return self.beta
 
 
