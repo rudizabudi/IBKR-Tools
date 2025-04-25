@@ -7,26 +7,26 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 from ibapi.contract import Contract
 
-import core
+from core import Core, CoreDistributor
 from gui.frame import MainWindow
 from services import controller
 
 faulthandler.enable()
 
 if __name__ == "__main__":
+    core: Core = CoreDistributor.get_core()
 
     start_gui = True
     start_tws_inst = True
     start_controller_loop = True
     tester = False
 
-    core = core.Core()
 
     def gui():
 
         app = QApplication(sys.argv)
         app.setWindowIcon(QIcon("icon.ico"))
-        MainWindow(core=core)
+        MainWindow()
         sys.exit(app.exec())
 
         # window.create_gui()
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         Thread(target=gui).start()
 
     def tws_con():
-        return controller.TWSRequests(core=core)
+        return controller.TWSRequests()
 
     if start_tws_inst:
         tws_con = tws_con()

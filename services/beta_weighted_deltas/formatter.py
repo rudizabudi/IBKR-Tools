@@ -1,22 +1,24 @@
-from math import copysign
 from statistics import mean
 
+from core import Core, CoreDistributor
+from services.beta_weighted_deltas.positions import Position
 
-type Position = 'Position'
 
-def generate_selection_list(positions):
+def generate_selection_list(positions: list[Position]) -> list[str]:
     if positions:
         positions_str_sorted = ['Overview', 'Portfolio']
         positions_str_sorted.extend(sorted(list(set(x.get_symbol() for x in positions))))
         return positions_str_sorted
 
+    raise ValueError('No positions provided to generate Selection List.')
+
 
 class TableContentGenerator:
-    def __init__(self, core):
-        self.core = core
+    def __init__(self):
+        self.core: Core = CoreDistributor.get_core()
         self.total_line = None
 
-        self.table_contents = core.table_contents
+        self.table_contents = self.core.table_contents
 
     def generate_position_cells(self, header: dict[str: str | float], positions: list[Position]):
 
@@ -28,7 +30,7 @@ class TableContentGenerator:
         if header['name'] in ['Overview', 'Portfolio']:
             return
 
-        self.table_contents[header['name']] =[]
+        self.table_contents[header['name']] = []
         add_empty_row()
 
         self.table_contents[header['name']][0][0] = header['name']
@@ -45,7 +47,7 @@ class TableContentGenerator:
         if underlying:
             add_empty_row()
             self.table_contents[header['name']][-1][1] = underlying.generate_name()
-            self.table_contents[header['name']][-1][2] = underlying.get_pos_size()
+            self.table_contents[header['name']][-1][2] = underlying.get_qty()
 
             delta = self.table_contents[header['name']][-1][2]
             sum_delta.append(delta)
@@ -64,7 +66,7 @@ class TableContentGenerator:
                 add_empty_row()
                 self.table_contents[header['name']][-1][1] = position.generate_name()
 
-                self.table_contents[header['name']][-1][2] = f'{position.get_pos_size():.0f}'
+                self.table_contents[header['name']][-1][2] = f'{position.get_qty():.0f}'
 
                 try:
                     avg_ivol.append(position.get_greeks()['iVol'])
@@ -75,28 +77,30 @@ class TableContentGenerator:
                     avg_ivol.append(0)
                     self.table_contents[header['name']][-1][3] = f'{0 * 100:.0f}%'
 
-                    print(f'KeyError:Position {position.generate_name()} has no IVOL', position.get_greeks())
+                    print(f'KeyError: {position.generate_name()} has no IVOL', position.get_greeks())
 
-                delta = position.get_greeks()['delta'] * position.get_pos_size() * 100
+                delta = position.get_greeks()['delta'] * position.get_qty() * 100
                 sum_delta.append(delta)
                 self.table_contents[header['name']][-1][4] = f'{delta:.2f}'
 
                 sum_bwd.append(delta * beta)
                 self.table_contents[header['name']][-1][5] = f'{delta * beta:.2f}'
 
-                sum_theta.append(position.get_greeks()['theta'] * position.get_pos_size() * 100)
-                self.table_contents[header['name']][-1][6] = f'{position.get_greeks()['theta'] * position.get_pos_size() * 100:.2f}'
+                sum_theta.append(position.get_greeks()['theta'] * position.get_qty() * 100)
+                self.table_contents[header['name']][-1][6] = f'{position.get_greeks()['theta'] * position.get_qty() * 100:.2f}'
 
-                if (' Call ' in position.generate_name() and position.get_pos_size() > 0) or (' Put ' in position.generate_name() and position.get_pos_size() < 0):
-                    l_gamma.append(position.get_greeks()['gamma'] * position.get_pos_size() * 100)
-                elif (' Call ' in position.generate_name() and position.get_pos_size() < 0) or (' Put ' in position.generate_name() and position.get_pos_size() > 0):
-                    s_gamma.append(position.get_greeks()['gamma'] * position.get_pos_size() * 100)
-                self.table_contents[header['name']][-1][7] = f'{position.get_greeks()['gamma'] * position.get_pos_size() * 100:.2f}'
+                if (' Call ' in position.generate_name() and position.get_qty() > 0) or (' Put ' in position.generate_name() and position.get_qty() < 0):
+                    l_gamma.append(position.get_greeks()['gamma'] * position.get_qty() * 100)
+                elif (' Call ' in position.generate_name() and position.get_qty() < 0) or (' Put ' in position.generate_name() and position.get_qty() > 0):
+                    s_gamma.append(position.get_greeks()['gamma'] * position.get_qty() * 100)
+                self.table_contents[header['name']][-1][7] = f'{position.get_greeks()['gamma'] * position.get_qty() * 100:.2f}'
 
                 not_pos.append(delta * underlying_price)
                 self.table_contents[header['name']][-1][8] = f'{delta * underlying_price:,.0f}'
 
-        if len(avg_ivol) > 0: self.table_contents[header['name']][0][3] = f'{mean(avg_ivol) * 100:.0f}%'
+        if len(avg_ivol) > 0:
+            self.table_contents[header['name']][0][3] = f'{mean(avg_ivol) * 100:.0f}%'
+
         self.table_contents[header['name']][0][4] = f'{sum(sum_delta):.2f}'
         self.table_contents[header['name']][0][5] = f'{sum(sum_bwd):.2f}'
         self.table_contents[header['name']][0][6] = f'{sum(sum_theta):.2f}'
@@ -111,14 +115,16 @@ class TableContentGenerator:
 
         self.total_line = [[] for _ in range(9)]
 
-        beta_avg, ivol_avg, delta_sum, bwd_sum, theta_sum, gamma_sum_positive, gamma_sum_negative , not_pos_sum = [], [], [], [], [], [], [], []
+        beta_avg, ivol_avg, delta_sum, bwd_sum, theta_sum, gamma_sum_positive, gamma_sum_negative, not_pos_sum = [], [], [], [], [], [], [], []
 
         for header in self.table_contents:
             beta_avg.append(float(self.table_contents[header][0][1]))
             try:
                 ivol_avg.append(int(self.table_contents[header][0][3][:-1]))
             except TypeError:
-                print('IVOL Error:', self.table_contents[header][0][3][:-1])
+                print('IVOL Error:', self.table_contents[header][0])
+                pass
+
             delta_sum.append(float(self.table_contents[header][0][4]))
             bwd_sum.append(float(self.table_contents[header][0][5]))
             theta_sum.append(float(self.table_contents[header][0][6]))
@@ -158,7 +164,7 @@ class TableContentGenerator:
 
         self.table_contents['Overview'].append(self.total_line)
 
-    def get_table_contents(self) -> dict[list[str | float]]:
+    def get_table_contents(self) -> dict[str, list[str | float]]:
         return self.table_contents
 
     def inject_dummy(self):

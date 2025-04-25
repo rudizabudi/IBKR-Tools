@@ -3,67 +3,46 @@ from time import sleep
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QListWidget, QLabel, QTableWidgetItem
+from PySide6.QtWidgets import QLabel, QTableWidgetItem
+
+from core import Core, CoreDistributor
 
 type CoreObj = 'CoreObj'
 type QtObj = 'QtObj'
 
 
 class BetaWeightedDeltas:
-    def __init__(self, core: CoreObj):
+    def __init__(self):
 
-        self.core: CoreObj = core
-        self.table_contents = core.table_contents
-
-        self._widget_built_finished: bool = False
+        self.core: Core = CoreDistributor.get_core()
+        self.table_contents = self.core.table_contents
 
         self.previous_selection: None | str = None
 
         self.symbol_list: list = ['Loading...']
 
+        print(345, self.core.widget_registry)
+        self.tab_registry = self.core.widget_registry['beta_weighted_deltas']
 
-    def build_widget(self):
-        def underlying_selection_list() -> QListWidget:
-            list_widget = QListWidget()
-            list_widget.setFont(QFont("", 18))
-            list_widget.addItems(['LOADING...'])
-            list_widget.setMaximumWidth(200)
-            list_widget.setMinimumWidth(100)
-            list_widget.setMinimumHeight(500)
-            list_widget.resize(200, 1245)
+        self.handle_widgets()
 
-            self.core.item_register['underlying_selection_list'] = list_widget
+        self.register_button_clicks()
 
-            return list_widget
+    def handle_widgets(self):
 
-        # def greek_table() -> QTableWidget:
-        #     table = QTableWidget(1000, 9)
-        #     table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        #     table.setMinimumSize(1020, 1230)
-        #     headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', ' γ Gamma (L|S)', 'Notional position']
-        #     table.setHorizontalHeaderLabels(headers)
-        #
-        #     table.setSelectionMode(QAbstractItemView.NoSelection)
-        #     table.verticalHeader().setVisible(False)
-        #
-        #     column_ratios = {0: 3,
-        #                      1: 7,
-        #                      2: 3,
-        #                      3: 3,
-        #                      4: 4,
-        #                      5: 7,
-        #                      6: 4,
-        #                      7: 6,
-        #                      8: 5}
-        #
-        #     for k, v in column_ratios.items():
-        #         width = int(round((table.width() / sum(column_ratios.values())) * v * .98, 0))
-        #         table.setColumnWidth(k, width)
-        #
-        #     self.core.item_register['greek_table'] = table
-        #     return table
+        def change_selection_list():
+            # list_widget = QListWidget()
+            selection_list = self.tab_registry['selection_list']
+            selection_list.setFont(QFont("", 18))
+            selection_list.addItems(self.symbol_list)
+            selection_list.setMaximumWidth(200)
+            selection_list.setMinimumWidth(100)
+            selection_list.setMinimumHeight(500)
+            selection_list.resize(200, 1245)
 
-        def update_label() -> QLabel:
+        change_selection_list()
+
+        def update_label():
             label = QLabel()
             label.setFont(QFont("", 10))
             label.setText(f'Last update:  --:--')
@@ -71,39 +50,32 @@ class BetaWeightedDeltas:
 
             self.core.item_register['update_label'] = label
 
-            return label
+        update_label()  # self.bwd_box.addWidget(underlying_selection_list(), alignment=Qt.AlignLeft)
 
-        self.bwd_box.addWidget(underlying_selection_list(), alignment=Qt.AlignLeft)
+        # self.bwd_box.addLayout(self.content_box)
 
-        self.bwd_box.addLayout(self.content_box)
+        # self.content_box.addWidget(update_label(), alignment=Qt.AlignRight)
+        # self.content_box.addWidget(greek_table())
 
-        self.content_box.addWidget(update_label(), alignment=Qt.AlignRight)
-        self.content_box.addWidget(greek_table())
-
-        self._widget_built_finished = True
+    def register_button_clicks(self):
+        self.tab_registry['selection_list'].currentItemChanged.connect(lambda: self.change_table_content())
 
     def tab_trigger(self):
-        bwd_table = self.get_widget_object(greek_table=True)
+        bwd_table = self.tab_registry['greek_table']
         bwd_table.clearContents()
-
-    def get_widget_object(self, selection_list: bool = False, greek_table: bool = False):
-        if all([selection_list, greek_table]):
-            raise Exception('Only one of selection_list or greek_table can be True.')
-        elif selection_list:
-            return self.core.widget_registry['beta_weighted_deltas']['selection_list']
-        elif greek_table:
-            return self.core.widget_registry['beta_weighted_deltas']['greek_table']
 
     def change_table_content(self):
         # TODO: Add sorting via 1 or 2 selection fields: sort by and ASC/DESC(?)
         # Alternative: Sort via column header click
 
-        if self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem():
-            bwd_table = self.get_widget_object(greek_table=True)
+        selection_list = self.tab_registry['selection_list']
+        bwd_table = self.tab_registry['greek_table']
+        if selection_list.currentItem():
             bwd_table.clear()
 
-            selection = self.core.widget_registry['beta_weighted_deltas']['selection_list'].currentItem().text()
+            selection = selection_list.currentItem().text()
             print(f'Selection from bwd_table check: {selection}')
+
             while selection not in self.core.table_contents.keys():
                 sleep(.01)
 
@@ -132,36 +104,34 @@ class BetaWeightedDeltas:
         self.core.item_register['update_label'].setText(f'Last update:  {datetime.now().strftime('%H:%M')}')
 
     def refresh_selection_list(self, symbol_list: list):
+        print('Refresh selection list')
+        selection_list =  self.tab_registry['selection_list']
+        selection_list.blockSignals(True)
 
-        bwd_selection_list = self.get_widget_object(selection_list=True)
-        bwd_selection_list.blockSignals(True)
-
-        if bwd_selection_list.currentItem():
-            selection = bwd_selection_list.currentItem().text()
+        if selection_list.currentItem():
+            selection = selection_list.currentItem().text()
         else:
             selection = None
 
-        bwd_selection_list.clear()
-        bwd_selection_list.addItems(symbol_list)
+        selection_list.clear()
+        selection_list.addItems(symbol_list)
 
-        for i in range(bwd_selection_list.count()):
-            bwd_selection_list.item(i).setFont(QFont(self.core.project_font, 16))
+        for i in range(selection_list.count()):
+            selection_list.item(i).setFont(QFont(self.core.project_font, 16))
 
         # Manage re-selection or default selection
         if selection in symbol_list:
-            while not bwd_selection_list.currentItem() or bwd_selection_list.currentItem().text() != selection:
+            while not selection_list.currentItem() or selection_list.currentItem().text() != selection:
                 try:
                     index = symbol_list.index(selection)
-                    bwd_selection_list.setCurrentRow(index)  # Set intended selection
+                    selection_list.setCurrentRow(index)  # Set intended selection
                     sleep(.1)
                 except AttributeError:
                     continue
         else:
-            bwd_selection_list.setCurrentRow(0)  # Default selection
+            selection_list.setCurrentRow(0)  # Default selection
 
-        bwd_selection_list.blockSignals(False)  # Re-enable signals
-
-
+        selection_list.blockSignals(False)  # Re-enable signals
 
     def selection_list_change(self):
         try:
@@ -171,6 +141,7 @@ class BetaWeightedDeltas:
 
     def set_symbol_list(self, symbol_list: list):
         self.symbol_list = symbol_list
+
 
 
 
