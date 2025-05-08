@@ -5,7 +5,8 @@ from PySide6.QtWidgets import QMainWindow, QHeaderView, QSizePolicy, QAbstractIt
 
 from core import Core, CoreDistributor
 from gui.app_settings import Settings
-from gui.modules.ui_main import Ui_MainWindow
+#from gui.modules.ui_main import Ui_MainWindow
+from gui.ui_main import Ui_MainWindow
 from gui.tabs.beta_weighted_deltas import BetaWeightedDeltas
 
 os.environ["QT_FONT_DPI"] = "96"

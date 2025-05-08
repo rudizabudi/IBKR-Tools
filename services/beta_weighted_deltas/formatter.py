@@ -62,12 +62,11 @@ class TableContentGenerator:
             underlying_price = self.core.underlying_prices[header['name']]
 
         for position in positions:
-            if position != underlying:
+            if position != underlying or underlying is None:
                 add_empty_row()
                 self.table_contents[header['name']][-1][1] = position.generate_name()
 
                 self.table_contents[header['name']][-1][2] = f'{position.get_qty():.0f}'
-
                 try:
                     avg_ivol.append(position.get_greeks()['iVol'])
                     self.table_contents[header['name']][-1][3] = f'{position.get_greeks()['iVol'] * 100:.0f}%'
@@ -78,7 +77,6 @@ class TableContentGenerator:
                     self.table_contents[header['name']][-1][3] = f'{0 * 100:.0f}%'
 
                     print(f'KeyError: {position.generate_name()} has no IVOL', position.get_greeks())
-
                 delta = position.get_greeks()['delta'] * position.get_qty() * 100
                 sum_delta.append(delta)
                 self.table_contents[header['name']][-1][4] = f'{delta:.2f}'

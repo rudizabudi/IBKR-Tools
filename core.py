@@ -19,6 +19,7 @@ if os.getenv('DEV_VAR') == 'rudizabudi':
 else:
     load_dotenv('.env')
 
+
 class Core:
     def __init__(self, thread_id):
         self.thread_id = thread_id
@@ -32,6 +33,7 @@ class Core:
     benchmark: str = os.getenv('BENCHMARK')
     beta_period: str = os.getenv('BETA_PERIOD')
 
+    controller_loop_interval: int = 60  # in secs
     reqId_hashmap: dict = {}
     reqId: int = 1
 
@@ -41,6 +43,7 @@ class Core:
 
     raw_positions: dict[str, dict[str, any]] = {}
 
+    requesting_positions: bool = False
     positions: list[ContractInstance] = []
     positions_str_sorted: list[str] = []
 

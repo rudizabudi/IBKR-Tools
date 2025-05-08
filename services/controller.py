@@ -1,3 +1,5 @@
+from time import sleep
+
 from core import CoreDistributor
 from services.beta_weighted_deltas.beta_weighted_deltas import calculate_beta, get_portfolio_positions, build_position_instances, generate_header_lines, update_selection_list, \
     request_position_greeks, generate_table_strings, filter_positions
@@ -28,8 +30,11 @@ class TWSRequests:
         while True:
             #if self.core.active_tab == 'beta_weighted_deltas':
             get_portfolio_positions(core=self.core, tws_api=self.tws_api)
-            #sleep(10)
+
             positions = build_position_instances(core=self.core, old_positions=positions)
+            for x in positions:
+                print(x)
+            print(' - - - ')
             positions = filter_positions(positions=positions)  # TODO: Add support for further types
 
             positions_str_sorted = update_selection_list(core=self.core, positions=positions)
@@ -46,6 +51,7 @@ class TWSRequests:
 
             self.core.tab_instances['beta_weighted_deltas'].change_table_content()
 
+            sleep(self.core.controller_loop_interval)
 
             # # if activa_tab == BWD
             # if startup['BWD']:
