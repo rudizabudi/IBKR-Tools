@@ -103,6 +103,7 @@ class TWSCon(EWrapper, EClient):
     def accountDownloadEnd(self, accountName: str):
         super().accountDownloadEnd(accountName)
         print("AccountDownloadEnd. Account:", accountName)
+        self.core.requesting_positions = False
 
 
 

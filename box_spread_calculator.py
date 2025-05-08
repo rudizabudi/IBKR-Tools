@@ -24,5 +24,5 @@ upper_yield = risk_free_rates[upper_dte]
 
 interpolated_yield = (lower_yield + ((duration - lower_dte) / (upper_dte - lower_dte)) * (upper_yield - lower_yield)) / 100
 
-print(f"The risk free rate for {duration} days is: {interpolated_yield:.4f}")
+print(f"The risk free rate for {duration} days is: {interpolated_yield * 100:.2f}%")
 

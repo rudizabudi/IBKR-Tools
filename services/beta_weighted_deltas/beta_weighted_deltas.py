@@ -23,6 +23,7 @@ def build_position_instances(core: Core, old_positions: list[Position]) -> list[
                 positions.append(pos)
                 #print('Add new position.')
 
+    positions = list(set(positions))
     return positions
 
 
@@ -68,7 +69,6 @@ def generate_table_strings(tcg: TableContentGenerator, pos_headers: dict[str, He
                       'beta': pos_headers[underlying].get_beta()}
 
             filtered_positions = list(filter(lambda x: x.get_symbol() == underlying, positions.copy()))
-
             tcg.generate_position_cells(header=header, positions=filtered_positions)
 
         tcg.calculate_total_line()
@@ -80,10 +80,13 @@ def generate_table_strings(tcg: TableContentGenerator, pos_headers: dict[str, He
 
 def get_portfolio_positions(core: Core, tws_api: TWSCon):
     core.raw_positions = {}
+    core.requesting_positions = True
     tws_api.reqAccountUpdates(True, core.account_id)
 
-    while not core.raw_positions:
+    while core.requesting_positions:
         sleep(.1)
+
+    tws_api.reqAccountUpdates(False, core.account_id)
 
 
 def request_position_greeks(core: Core, tws_api: TWSCon, positions: list[Position]):

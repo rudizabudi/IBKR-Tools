@@ -81,3 +81,8 @@ if __name__ == "__main__":
     if tester:
         test_lab(tws_con)
 
+
+    """
+    IDEA: Add a dollar-beta weighted column for exposure (Mark Meldrum: https://youtu.be/FYszi2Otsrw?si=K62RdfPEi0if3hC2&t=1656)
+    """
+

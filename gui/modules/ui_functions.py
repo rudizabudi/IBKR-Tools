@@ -217,9 +217,12 @@ class UIFunctions(MainWindow):
                 # MOVE WINDOW
                 #QPoint(1920, 330)
                 if event.buttons() == Qt.LeftButton:
-                    self.move(self.pos() + event.globalPos() - self.dragPos)
-                    self.dragPos = event.globalPos()
-                    event.accept()
+                    if event.buttons() == Qt.LeftButton:
+                        self.move(self.pos() + event.globalPos() - self.dragPos)
+                        self.move(self.pos() + event.globalPos())
+
+                        self.dragPos = event.globalPos()
+                        event.accept()
             self.ui.titleRightInfo.mouseMoveEvent = moveWindow
 
             # CUSTOM GRIPS

@@ -23,18 +23,27 @@ class Position:
         self.price_data = {}
         self.historical_data_end = False
 
-    def __str__(self) -> str:
-        match self.contract.secType:
-            case 'STK':
-                return f'<Data Container Instance> {self.contract.symbol} {self.contract.secType}'
-            case 'OPT':
-                dt_s: str = datetime.strptime(self.contract.lastTradeDateOrContractMonth, "%Y%m%d").strftime("%d%b%y")
-                return f'<Data Container Instance> {self.contract.symbol} {self.contract.strike}{self.contract.right} {dt_s} {self.contract.secType}'
-            case _:
-                raise Exception(f'Contract type {self.contract.secType} not supported.')
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Position):
+            return Exception('Cannot compare Position instance with other class instance.')
+
+        return self.contract == other.contract and self.qty == other.qty
+
+    def __hash__(self) -> int:
+        return hash((self.contract, self.qty))
 
     def __repr__(self) -> str:
         return self.__str__()
+
+    def __str__(self) -> str:
+        match self.contract.secType:
+            case 'STK':
+                return f'<Data Container Instance> {self.contract.symbol} {self.contract.secType} & PosSize {self.qty}'
+            case 'OPT':
+                dt_s: str = datetime.strptime(self.contract.lastTradeDateOrContractMonth, "%Y%m%d").strftime("%d%b%y")
+                return f'<Data Container Instance> {self.contract.symbol} {self.contract.strike}{self.contract.right} {dt_s} {self.contract.secType} & PosSize {self.qty}'
+            case _:
+                raise Exception(f'Contract type {self.contract.secType} not supported.')
 
     def generate_name(self) -> str:
         match self.contract.secType:
