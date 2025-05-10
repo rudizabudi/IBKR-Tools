@@ -32,9 +32,7 @@ class TWSRequests:
             get_portfolio_positions(core=self.core, tws_api=self.tws_api)
 
             positions = build_position_instances(core=self.core, old_positions=positions)
-            for x in positions:
-                print(x)
-            print(' - - - ')
+
             positions = filter_positions(positions=positions)  # TODO: Add support for further types
 
             positions_str_sorted = update_selection_list(core=self.core, positions=positions)

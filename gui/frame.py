@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
 
         self.register_widgets()
 
-        self.register_button_clicks()
+        self.register_events()
         self.register_subpage_instances()
 
         self.ui.stackedWidget.setCurrentWidget(self.core.tab_instances['home'])
@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
         self.set_active_tab('home')
 
     # Shared button registry
-    def register_button_clicks(self):
+    def register_events(self):
         # TOGGLE MENU
         self.core.widget_registry['general']['btn_toggle'].clicked.connect(lambda: UIFunctions.toggleMenu(self, True))
 
@@ -59,7 +59,6 @@ class MainWindow(QMainWindow):
         self.core.widget_registry['general']['btn_home'].clicked.connect(self.click_handler)
         self.core.widget_registry['general']['btn_bwd'].clicked.connect(self.click_handler)
         self.core.widget_registry['general']['btn_box_spread'].clicked.connect(self.click_handler)
-
 
         #self.ui.bwd_listWidget.currentItemChanged.connect(lambda: self.core.tab_instances['beta_weighted_deltas'].change_table_content())
 
@@ -70,9 +69,12 @@ class MainWindow(QMainWindow):
                             'stacked_widget': self.ui.stackedWidget, 'label_header': self.ui.label_header},
                 'beta_weighted_deltas': {'frame': self.ui.bwd_frame, 'list_selection': self.ui.bwd_listWidget,
                                          'table_greeks': self.ui.bwd_tableWidget},
-                'box_spread': {'btn_type': self.ui.bxs_btn_type, 'label_currency': self.ui.bxs_label_currency,
-                               'comboBox_currency': self.ui.bxs_comboBox_currency},
-                'misc': {'title_right_info': self.ui.titleRightInfo}
+                'box_spread':   {'btn_type': self.ui.bxs_btn_type,
+                                 'label_currency': self.ui.bxs_label_currency, 'comboBox_currency': self.ui.bxs_comboBox_currency,
+                                 'comboBox_index': self.ui.bxs_comboBox_index, 'label_index': self.ui.bxs_label_index,
+                                 'comboBox_expiry': self.ui.bxs_comboBox_expiry, 'label_expiry': self.ui.bxs_label_expiry,
+                                 'slider_rate': self.ui.bxs_horizontalSlider_rate},
+                'misc': {'title_right_info': self.ui.titleRightInfo, 'leftMenuBg': self.ui.leftMenuBg, 'contentTopBg': self.ui.contentTopBg,}
             }
 
     # Subpage instances
@@ -82,6 +84,7 @@ class MainWindow(QMainWindow):
         self.core.tab_instances['beta_weighted_deltas'] = BetaWeightedDeltas()
         self.core.tab_instances['box_spread'] = BoxSpread()
 
+    # Framework widgets only
     def customize_widgets(self):
         self.core.widget_registry['general']['btn_home'].setStyleSheet(UIFunctions.selectMenu(self.core.widget_registry['general']['btn_home'].styleSheet()))
 
@@ -144,10 +147,11 @@ class MainWindow(QMainWindow):
         # Update Size Grips
         UIFunctions.resize_grips(self)
         new_size = event.size()
+        super().resizeEvent(event)
 
         match self.core.active_tab:
             case 'beta_weighted_deltas':
-                self.core.tab_instances['beta_weighted_deltas'].bwd_resize_event()
+                self.core.tab_instances['beta_weighted_deltas'].bwd_resize_event(new_size)
 
 from gui.modules.ui_functions import UIFunctions
 

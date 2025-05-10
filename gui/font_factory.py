@@ -25,9 +25,13 @@ def font_factory(core=None):
                     (wr['box_spread']['btn_type'], 14),
                     (wr['box_spread']['label_currency'], 14),
                     (wr['box_spread']['comboBox_currency'], 14),
+                    (wr['box_spread']['comboBox_index'], 14),
+                    (wr['box_spread']['label_index'], 14),
+                    (wr['box_spread']['comboBox_expiry'], 14),
+                    (wr['box_spread']['label_expiry'], 14),
+
                     ]
 
     for obj, size in font_objects:
-        print(obj)
         font = QFont(core.project_font, size)
         obj.setFont(font)

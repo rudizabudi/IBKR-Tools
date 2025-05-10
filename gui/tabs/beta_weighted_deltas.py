@@ -25,20 +25,21 @@ class BetaWeightedDeltas:
 
         self.handle_widgets()
 
-        self.register_button_clicks()
+        self.register_events()
 
-    def register_button_clicks(self):
+    def register_events(self):
         self.tab_registry['list_selection'].currentItemChanged.connect(lambda: self.change_table_content())
 
     def tab_trigger(self):
         self.tab_registry['table_greeks'].clearContents()
 
-    def bwd_resize_event(self):
-        self.core.widget_registry['beta_weighted_deltas']['frame'].setGeometry(self.ui.bwd_frame.geometry().x(), self.ui.bwd_frame.geometry().y(), new_size.width() - self.ui.leftMenuBg.width(), new_size.height() - self.ui.contentTopBg.height())
+    def bwd_resize_event(self, new_size: int):
+        bwd_frame = self.tab_registry['frame']
+        bwd_frame.setGeometry(bwd_frame.geometry().x(), bwd_frame.geometry().y(), new_size.width() - self.core.widget_registry['misc']['leftMenuBg'].width(), new_size.height() - self.core.widget_registry['misc']['contentTopBg'].height())
 
         headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', ' γ Gamma (L|S)', 'Notional position']
 
-        bwd_table_widget = self.core.widget_registry['beta_weighted_deltas']['greek_table']
+        bwd_table_widget = self.tab_registry['table_greeks']
         bwd_table_widget.setHorizontalHeaderLabels(headers)
 
         bwd_table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)

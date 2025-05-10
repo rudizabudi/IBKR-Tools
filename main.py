@@ -9,13 +9,13 @@ from ibapi.contract import Contract
 
 from core import Core, CoreDistributor
 from gui.frame import MainWindow
+
 from services import controller
 
 faulthandler.enable()
 
 if __name__ == "__main__":
     core: Core = CoreDistributor.get_core()
-
     start_gui = True
     start_tws_inst = True
     start_controller_loop = True
