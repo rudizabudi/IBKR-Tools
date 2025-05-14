@@ -1,0 +1,40 @@
+{
+    "currencies": {
+        "EUR": {
+            "DAX": {
+                "symbol": "DAX"
+            },
+            "PX1": {
+                "symbol": "CAC40"
+            }
+        },
+        "USD": {
+            "SPX": {
+                "symbol": "SPX"
+            },
+            "NDX": {
+                "symbol": "NDX"
+            }
+        },
+        "GBP": {
+            "FTSE": {
+                "symbol": "Z"
+            }
+        },
+        "CHF": {
+            "SMI": {
+                "symbol": "SMI"
+            }
+        },
+        "JPY": {
+            "NKY": {
+                "symbol": "N225"
+            }
+        },
+        "CAD": {
+            "TSE": {
+                "symbol": "TSE60"
+            }
+        }
+    }
+}
