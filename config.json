@@ -1,0 +1,12 @@
+{
+    "profiles": {
+        "live_account": {
+            "api_host_ip": "127.0.0.1",
+            "API_PORT": 7497,
+            "api_client_id": 1337,
+            "ibkr_account_id": "U1067XYZ",
+            "beta_benchmark": "SPY",
+            "BETA_PERIOD": "1 Y"
+        }
+    }
+}
