@@ -13,7 +13,7 @@ class TWSRequests:
         self.tws_api = TWSCon()
 
     def check_account_id(self) -> bool:
-        if self.core.account_list and self.core.account_id in self.core.account_list:
+        if self.core.account_list and self.core.ACCOUNT_ID in self.core.account_list:
             #print(self.core.account_list)
             return True
         return False
@@ -23,7 +23,7 @@ class TWSRequests:
         # TODO: Active tab Enum in core to define update loop by active tab
             # Move single tab logic into folders
         if not self.check_account_id():
-            ...  # TODO: account_id selection popup
+            ...  # TODO: ACCOUNT_ID selection popup
 
         startup = {'BWD': True}
         positions = []

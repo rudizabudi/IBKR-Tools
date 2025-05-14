@@ -16,6 +16,7 @@ faulthandler.enable()
 
 if __name__ == "__main__":
     core: Core = CoreDistributor.get_core()
+    core.load_config()
     start_gui = True
     start_tws_inst = True
     start_controller_loop = True

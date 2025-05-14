@@ -81,12 +81,12 @@ def generate_table_strings(tcg: TableContentGenerator, pos_headers: dict[str, He
 def get_portfolio_positions(core: Core, tws_api: TWSCon):
     core.raw_positions = {}
     core.requesting_positions = True
-    tws_api.reqAccountUpdates(True, core.account_id)
+    tws_api.reqAccountUpdates(True, core.ACCOUNT_ID)
 
     while core.requesting_positions:
         sleep(.1)
 
-    tws_api.reqAccountUpdates(False, core.account_id)
+    tws_api.reqAccountUpdates(False, core.ACCOUNT_ID)
 
 
 def request_position_greeks(core: Core, tws_api: TWSCon, positions: list[Position]):

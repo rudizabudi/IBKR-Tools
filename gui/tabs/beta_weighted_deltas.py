@@ -33,7 +33,7 @@ class BetaWeightedDeltas:
     def tab_trigger(self):
         self.tab_registry['table_greeks'].clearContents()
 
-    def bwd_resize_event(self, new_size: int):
+    def bwd_resize_event(self, new_size: int = None):
         bwd_frame = self.tab_registry['frame']
         bwd_frame.setGeometry(bwd_frame.geometry().x(), bwd_frame.geometry().y(), new_size.width() - self.core.widget_registry['misc']['leftMenuBg'].width(), new_size.height() - self.core.widget_registry['misc']['contentTopBg'].height())
 
@@ -116,9 +116,6 @@ class BetaWeightedDeltas:
             bwd_table.setHorizontalHeaderLabels(headers)
             bwd_table.horizontalHeader().setFont(QFont(self.core.project_font, 9))
             self.previous_selection = selection
-
-    def update_time_now(self): # TODO: FIX THIS
-        self.core.item_register['update_label'].setText(f'Last update:  {datetime.now().strftime('%H:%M')}')
 
     def refresh_selection_list(self, symbol_list: list):
         selection_list = self.tab_registry['list_selection']

@@ -1,9 +1,9 @@
-import os
-import threading
 from dataclasses import dataclass
 from datetime import datetime
-
 from dotenv import load_dotenv
+import json
+import os
+import threading
 
 #from services.contracts import Position
 
@@ -12,26 +12,53 @@ type SubPageInstance = 'SubPageInstance'
 type DataHandlerInstance = 'DataHandlerInstance'
 type QtObj = 'QtObj'
 type QTFunc = 'QTFunc'
-load_dotenv('.env_dev_live')
-
-if os.getenv('DEV_VAR') == 'rudizabudi':
-    load_dotenv('.env_dev_live')
-else:
-    load_dotenv('.env')
 
 
 class Core:
     def __init__(self, thread_id):
         self.thread_id = thread_id
 
-    host_ip: str = os.getenv('HOST_IP')
-    api_port: int = int(os.getenv('API_PORT'))
+    @classmethod
+    def load_config(cls):
+        if os.getenv('DEV_VAR') == 'rudizabudi':
+            CONFIG_FILE = 'config_dev.json'
+        else:
+            CONFIG_FILE = 'config.json'
 
-    client_id: int = int(os.getenv('CLIENT_ID'))
-    account_id: str | None = os.getenv('ACCOUNT_ID') # TODO: Add selection popup if no account_Id provided
+        if not os.path.exists(os.path.join(os.path.dirname(__file__), 'config.json')):
+            raise FileNotFoundError(f"Config file '{CONFIG_FILE}' not found.")
 
-    benchmark: str = os.getenv('BENCHMARK')
-    beta_period: str = os.getenv('BETA_PERIOD')
+        with open(os.path.join(os.path.dirname(__file__), CONFIG_FILE), 'r') as file:
+            config = json.load(file)
+
+        if len(config['profiles']) == 0:
+            raise ValueError("No profiles found in the config file.")
+
+        for i, x in enumerate(config['profiles'].keys(), start=1):
+            print(f'Profile {i}: {x}')
+
+        if len(config['profiles']) > 1:
+            selection = -1
+            while selection not in range(len(config['profiles'])):
+                try:
+                    selection = int(input('Select profile: ')) - 1
+                except ValueError:
+                    print('Invalid input. Please enter a number.')
+
+            config = config['profiles'][list(config['profiles'].keys())[selection]]
+        else:
+            config = config['profiles'][list(config['profiles'].keys())[0]]
+
+        try:
+            cls.HOST_IP = config['api_host_ip']
+            cls.API_PORT = config['api_port']
+            cls.CLIENT_ID = config['api_client_id']
+            cls.ACCOUNT_ID = config['ibkr_account_id']
+            cls.BENCHMARK = config['beta_benchmark']
+            cls.BETA_PERIOD = config['beta_period']
+
+        except KeyError as e:
+            raise KeyError(f'Missing key in config file: {e}')
 
     controller_loop_interval: int = 60  # in secs
     reqId_hashmap: dict = {}
@@ -58,12 +85,9 @@ class Core:
 
     widget_registry: dict[str: dict[str: QtObj]] = {}
     tab_instances: dict[str: dict[str: DataHandlerInstance] | DataHandlerInstance] = {}
-
+    #TODO: Global event trigger class to handle services <-> gui interactions
     project_font = None
 
-    @classmethod
-    def set_TWSCon(cls, TWSCon):
-        cls.TWSCon = TWSCon
 
 @dataclass
 class CoreDistributor:

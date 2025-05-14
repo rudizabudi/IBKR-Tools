@@ -21,27 +21,38 @@ class BoxSpread:
 
         self.tab_registry = self.core.widget_registry['box_spread']
 
-        self.register_events()
-
         self.selection_options: dict[str, dict[str, dict[str, str]]] = self.load_selection_options()
         self.box_spread_type = BoxSpreadType.LEND
         self.box_spread_type_btn(change=False)
 
+        self.register_events()
         self.handle_widgets()
 
     def register_events(self):
         self.tab_registry['btn_type'].clicked.connect(lambda: self.box_spread_type_btn(change=True))
-        self.tab_registry['comboBox_currency'].currentIndexChanged.connect(lambda: self.currency_selected())
+        self.tab_registry['comboBox_currency'].currentIndexChanged.connect(lambda: (self.check_selection_options(), self.currency_selected()))
 
-        self.tab_registry['comboBox_index'].currentIndexChanged.connect(lambda: self.index_selected())
+        self.tab_registry['comboBox_index'].currentIndexChanged.connect(lambda: (self.check_selection_options(), self.index_selected()))
 
         self.tab_registry['slider_rate'].sliderMoved.connect(lambda x: print(123, x))
-        self.tab_registry['slider_rate'].setEnabled(False)
 
-        self.opacity_effect = QGraphicsOpacityEffect(self.tab_registry['slider_rate']).setOpacity(0.25)
-        self.tab_registry['slider_rate'].setGraphicsEffect(self.opacity_effect)
+    def check_selection_options(self):
+        pass
 
-        
+    @staticmethod
+    def set_transparency(widget, transparency: int) -> None:
+        match transparency:
+            case 0:
+                widget.setVisible(False)
+            case 1:
+                widget.setVisible(True)
+            case _:
+                raise Exception(f"Transparency value {transparency} not supported. Must be 0, 1 or 100.")
+
+        # opacity_effect = QGraphicsOpacityEffect(widget)
+        # opacity_effect.setOpacity(transparency)
+        # widget.setGraphicsEffect(opacity_effect)
+
     def currency_selected(self):
         selected_currency = self.tab_registry['comboBox_currency'].currentText()
 
@@ -51,7 +62,6 @@ class BoxSpread:
 
     def index_selected(self):
         selected_index = self.tab_registry['comboBox_index'].currentText()
-        print(f'{selected_index} selected')
 
     def handle_widgets(self):
         self.set_currency_options()
@@ -88,4 +98,3 @@ class BoxSpread:
 class BoxSpreadType(StrEnum):
     LEND = 'LEND'
     BORROW = 'BORROW'
-

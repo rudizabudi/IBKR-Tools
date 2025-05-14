@@ -5,7 +5,7 @@ from core import CoreDistributor
 
 def create_benchmark_contract() -> ibContract:
     benchmark_contract = ibContract()
-    benchmark_contract.symbol = CoreDistributor.get_core().benchmark
+    benchmark_contract.symbol = CoreDistributor.get_core().BENCHMARK
     benchmark_contract.secType = 'STK'
     benchmark_contract.exchange = 'SMART'
     benchmark_contract.currency = 'USD'

@@ -18,7 +18,7 @@ class TWSCon(EWrapper, EClient):
 
         self.core: Core = CoreDistributor.get_core()
         self.core.no_contract = False
-        self.connect(self.core.host_ip, self.core.api_port, self.core.client_id)
+        self.connect(self.core.HOST_IP, self.core.API_PORT, self.core.CLIENT_ID)
         self.t: threading.Thread = threading.Thread(target=self.run, daemon=True)
         self.t.start()
         time.sleep(1)

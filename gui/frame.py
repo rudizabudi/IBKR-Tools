@@ -1,7 +1,8 @@
+from datetime import datetime
 import os
 
-from PySide6.QtGui import QFontDatabase, QFont
-from PySide6.QtWidgets import QMainWindow, QHeaderView, QSizePolicy, QAbstractItemView, QTableWidgetItem
+from PySide6.QtWidgets import QMainWindow, QHeaderView
+
 
 from core import Core, CoreDistributor
 from gui.app_settings import Settings
@@ -47,6 +48,7 @@ class MainWindow(QMainWindow):
 
         self.customize_widgets()
         font_factory(core=self.core)
+
         self.show()
         self.set_active_tab('home')
 
@@ -65,17 +67,23 @@ class MainWindow(QMainWindow):
     # Global widget registry
     def register_widgets(self):
         self.core.widget_registry = {
-                'general': {'btn_home': self.ui.btn_home, 'btn_bwd': self.ui.btn_bwd, 'btn_box_spread': self.ui.btn_box_spread, 'btn_toggle': self.ui.toggleButton,
-                            'stacked_widget': self.ui.stackedWidget, 'label_header': self.ui.label_header},
-                'beta_weighted_deltas': {'frame': self.ui.bwd_frame, 'list_selection': self.ui.bwd_listWidget,
-                                         'table_greeks': self.ui.bwd_tableWidget},
-                'box_spread':   {'btn_type': self.ui.bxs_btn_type,
-                                 'label_currency': self.ui.bxs_label_currency, 'comboBox_currency': self.ui.bxs_comboBox_currency,
-                                 'comboBox_index': self.ui.bxs_comboBox_index, 'label_index': self.ui.bxs_label_index,
-                                 'comboBox_expiry': self.ui.bxs_comboBox_expiry, 'label_expiry': self.ui.bxs_label_expiry,
-                                 'slider_rate': self.ui.bxs_horizontalSlider_rate},
-                'misc': {'title_right_info': self.ui.titleRightInfo, 'leftMenuBg': self.ui.leftMenuBg, 'contentTopBg': self.ui.contentTopBg,}
-            }
+            'general': {'btn_home': self.ui.btn_home, 'btn_bwd': self.ui.btn_bwd, 'btn_box_spread': self.ui.btn_box_spread, 'btn_toggle': self.ui.toggleButton,
+                        'stacked_widget': self.ui.stackedWidget, 'label_header': self.ui.label_header},
+            'beta_weighted_deltas': {'frame': self.ui.bwd_frame, 'list_selection': self.ui.bwd_listWidget,
+                                     'table_greeks': self.ui.bwd_tableWidget},
+            'box_spread': {'btn_type': self.ui.bxs_btn_type,
+                           'label_currency': self.ui.bxs_label_currency, 'comboBox_currency': self.ui.bxs_comboBox_currency,
+                           'comboBox_index': self.ui.bxs_comboBox_index, 'label_index': self.ui.bxs_label_index,
+                           'comboBox_expiry': self.ui.bxs_comboBox_expiry, 'label_expiry': self.ui.bxs_label_expiry,
+                           'slider_rate': self.ui.bxs_horizontalSlider_rate, 'label_benchmark_rate': self.ui.bxs_label_benchmark_rate,
+                           'label_lower_rate': self.ui.bxs_label_lower_rate, 'label_higher_rate': self.ui.bxs_label_higher_rate,
+                           'label_selected_rate': self.ui.bxs_label_selected_rate, 'label_upper_strike': self.ui.bxs_label_upper_strike,
+                           'line_upper_strike': self.ui.bxs_lineEdit_upper_strike, 'label_lower_strike': self.ui.bxs_label_lower_strike,
+                           'line_lower_strike': self.ui.bxs_lineEdit_lower_strike, 'label_spread': self.ui.bxs_label_spread,
+                           'label_amount': self.ui.bxs_label_amount, 'line_amount': self.ui.bxs_lineEdit_amount,
+                           'label_nominal': self.ui.bxs_label_nominal, 'price': self.ui.bxs_label_underlying_price},
+            'misc': {'title_right_info': self.ui.titleRightInfo, 'leftMenuBg': self.ui.leftMenuBg, 'contentTopBg': self.ui.contentTopBg, 'rightTopLabel': self.ui.titleRightInfo}
+        }
 
     # Subpage instances
     def register_subpage_instances(self):
@@ -84,12 +92,14 @@ class MainWindow(QMainWindow):
         self.core.tab_instances['beta_weighted_deltas'] = BetaWeightedDeltas()
         self.core.tab_instances['box_spread'] = BoxSpread()
 
-    # Framework widgets only
+    # Shared widgets only
     def customize_widgets(self):
         self.core.widget_registry['general']['btn_home'].setStyleSheet(UIFunctions.selectMenu(self.core.widget_registry['general']['btn_home'].styleSheet()))
 
         #self.ui.titleRightInfo.setText('Title right info')
         self.core.widget_registry['general']['label_header'].setText('IBKR Tools')
+
+        self.core.widget_registry['misc']['rightTopLabel'].setText(f'🟢  Last update:  {datetime.now().strftime('%H:%M')}')
 
         self.ui.bwd_tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
@@ -153,5 +163,5 @@ class MainWindow(QMainWindow):
             case 'beta_weighted_deltas':
                 self.core.tab_instances['beta_weighted_deltas'].bwd_resize_event(new_size)
 
-from gui.modules.ui_functions import UIFunctions
 
+from gui.modules.ui_functions import UIFunctions

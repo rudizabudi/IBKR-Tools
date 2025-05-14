@@ -23,6 +23,5 @@ def fix_resources_import():
 if __name__ == '__main__':
     #compile_pyside_resources(r"C:\Users\fruhd\OneDrive\CloudDesktop\Python\ibkr_tools\gui\pyside_compile.bat")
     fix_resources_import()
-    print('Done')
 
 
