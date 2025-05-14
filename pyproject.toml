@@ -1,0 +1,13 @@
+[project]
+name = "IBKR_Tools"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv>=0.9.9",
+    "ibapi>=9.81.1.post1",
+    "pandas>=2.2.3",
+    "pyside6>=6.9.0",
+    "requests>=2.32.3",
+]

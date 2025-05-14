@@ -21,14 +21,14 @@ class Core:
     @classmethod
     def load_config(cls):
         if os.getenv('DEV_VAR') == 'rudizabudi':
-            CONFIG_FILE = 'config_dev.json'
+            config_file = 'config_dev.json'
         else:
-            CONFIG_FILE = 'config.json'
+            config_file = 'config.json'
 
         if not os.path.exists(os.path.join(os.path.dirname(__file__), 'config.json')):
-            raise FileNotFoundError(f"Config file '{CONFIG_FILE}' not found.")
+            raise FileNotFoundError(f"Config file '{config_file}' not found.")
 
-        with open(os.path.join(os.path.dirname(__file__), CONFIG_FILE), 'r') as file:
+        with open(os.path.join(os.path.dirname(__file__), config_file), 'r') as file:
             config = json.load(file)
 
         if len(config['profiles']) == 0:
