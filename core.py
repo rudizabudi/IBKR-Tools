@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-from dotenv import load_dotenv
 import json
 import os
 import threading
@@ -15,8 +14,8 @@ type QTFunc = 'QTFunc'
 
 
 class Core:
-    def __init__(self, thread_id):
-        self.thread_id = thread_id
+    def __init__(self):
+        pass
 
     @classmethod
     def load_config(cls):
@@ -91,15 +90,17 @@ class Core:
 
 @dataclass
 class CoreDistributor:
-    _local = threading.local()
+    _lock = threading.Lock()
+    _core_instance = None
 
+    # Make core variable space threadsafe
     @classmethod
     def get_core(cls):
-        current_thread_id = threading.get_ident()
-
-        if not hasattr(cls._local, 'core_instance'):
-            cls._local.core_instance = Core(current_thread_id)
-        return cls._local.core_instance
+        if cls._core_instance is None:
+            with cls._lock:
+                if cls._core_instance is None:
+                    cls._core_instance = Core()
+        return cls._core_instance
 
 
 def tprint(text: str = '', *args, **kwargs):
