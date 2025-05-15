@@ -216,10 +216,10 @@ class UIFunctions(MainWindow):
                     UIFunctions.maximize_restore(self)
                 # MOVE WINDOW
                 #QPoint(1920, 330)
+
                 if event.buttons() == Qt.LeftButton:
                     if event.buttons() == Qt.LeftButton:
                         self.move(self.pos() + event.globalPos() - self.dragPos)
-                        self.move(self.pos() + event.globalPos())
 
                         self.dragPos = event.globalPos()
                         event.accept()
