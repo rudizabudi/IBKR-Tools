@@ -1368,7 +1368,7 @@ class Ui_MainWindow(object):
         self.btn_bwd.setText(QCoreApplication.translate("MainWindow", u"Beta Weighted Deltas", None))
         self.btn_box_spread.setText(QCoreApplication.translate("MainWindow", u"Box Spread", None))
         self.label_header.setText(QCoreApplication.translate("MainWindow", u"IBKR Tools", None))
-        self.titleRightInfo.setText(QCoreApplication.translate("MainWindow", u"Not yet updated.", None))
+        self.titleRightInfo.setText("")
 #if QT_CONFIG(tooltip)
         self.minimizeAppBtn.setToolTip(QCoreApplication.translate("MainWindow", u"Minimize", None))
 #endif // QT_CONFIG(tooltip)
