@@ -10,13 +10,12 @@ from core import tprint
 
 
 class TWSCon(EWrapper, EClient):
-
     def __init__(self):
-
         super().__init__()
         EClient.__init__(self, wrapper=self)
 
         self.core: Core = CoreDistributor.get_core()
+
         self.core.no_contract = False
         self.connect(self.core.HOST_IP, self.core.API_PORT, self.core.CLIENT_ID)
         self.t: threading.Thread = threading.Thread(target=self.run, daemon=True)
@@ -25,9 +24,14 @@ class TWSCon(EWrapper, EClient):
 
     def connectAck(self):
         tprint('Connected.')
+        while 'misc' not in self.core.widget_registry.keys():
+            time.sleep(0.1)
+
+        self.core.widget_registry['misc']['rightTopLabel'].setText('🟢 Connected.   ')
 
     def connectionClosed(self):
         tprint('Disconnected.')
+        self.core.widget_registry['misc']['rightTopLabel'].setText('🔴 Not connected.   ')
 
     def error(self, reqId, errorCode, errorString):
         #tprint(f'{reqId}, {errorCode}, {errorString}')
@@ -99,6 +103,7 @@ class TWSCon(EWrapper, EClient):
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         super().historicalDataEnd(reqId, start, end)
         self.core.reqId_hashmap[reqId].__self__.set_historical_data_end(flag=True)
+
 
     def accountDownloadEnd(self, accountName: str):
         super().accountDownloadEnd(accountName)
