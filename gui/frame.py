@@ -22,7 +22,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         self.core: Core = CoreDistributor.get_core()
-
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
@@ -44,10 +43,10 @@ class MainWindow(QMainWindow):
         self.register_events()
         self.register_subpage_instances()
 
-        self.ui.stackedWidget.setCurrentWidget(self.core.tab_instances['home'])
-
         self.customize_widgets()
         font_factory(core=self.core)
+
+        self.ui.stackedWidget.setCurrentWidget(self.core.tab_instances['home'])
 
         self.show()
         self.set_active_tab('home')
@@ -82,8 +81,10 @@ class MainWindow(QMainWindow):
                            'line_lower_strike': self.ui.bxs_lineEdit_lower_strike, 'label_spread': self.ui.bxs_label_spread,
                            'label_amount': self.ui.bxs_label_amount, 'line_amount': self.ui.bxs_lineEdit_amount,
                            'label_nominal': self.ui.bxs_label_nominal, 'price': self.ui.bxs_label_underlying_price},
-            'misc': {'title_right_info': self.ui.titleRightInfo, 'leftMenuBg': self.ui.leftMenuBg, 'contentTopBg': self.ui.contentTopBg, 'rightTopLabel': self.ui.titleRightInfo}
+            'misc': {'title_right_info': self.ui.titleRightInfo, 'leftMenuBg': self.ui.leftMenuBg, 'contentTopBg': self.ui.contentTopBg,
+                     'rightTopLabel': self.ui.titleRightInfo}
         }
+        print('Widget registry initialized.')
 
     # Subpage instances
     def register_subpage_instances(self):
@@ -96,10 +97,10 @@ class MainWindow(QMainWindow):
     def customize_widgets(self):
         self.core.widget_registry['general']['btn_home'].setStyleSheet(UIFunctions.selectMenu(self.core.widget_registry['general']['btn_home'].styleSheet()))
 
-        #self.ui.titleRightInfo.setText('Title right info')
         self.core.widget_registry['general']['label_header'].setText('IBKR Tools')
+        #self.core.widget_registry['general']['rightTopLabel'].setText('🔴 Not connected.')
 
-        self.core.widget_registry['misc']['rightTopLabel'].setText(f'🟢  Last update:  {datetime.now().strftime('%H:%M')}')
+        #self.core.widget_registry['misc']['rightTopLabel'].setText(f'🟢  Last update:  {datetime.now().strftime('%H:%M')}')
 
         self.ui.bwd_tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
