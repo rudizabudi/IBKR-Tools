@@ -1141,23 +1141,36 @@ class Ui_MainWindow(object):
         self.bxs_btn_type.setLayoutDirection(Qt.LeftToRight)
         self.bxs_comboBox_currency = QComboBox(self.box_spread)
         self.bxs_comboBox_currency.setObjectName(u"bxs_comboBox_currency")
-        self.bxs_comboBox_currency.setGeometry(QRect(230, 120, 101, 41))
+        self.bxs_comboBox_currency.setGeometry(QRect(120, 120, 101, 41))
+        self.bxs_comboBox_currency.setStyleSheet(u"color: rgb(255, 15, 51);\n"
+"background-color: rgb(40, 44, 52);\n"
+"")
         self.bxs_label_currency = QLabel(self.box_spread)
         self.bxs_label_currency.setObjectName(u"bxs_label_currency")
-        self.bxs_label_currency.setGeometry(QRect(40, 130, 161, 20))
+        self.bxs_label_currency.setGeometry(QRect(88, 85, 161, 20))
+        self.bxs_label_currency.setAlignment(Qt.AlignCenter)
         self.bxs_label_index = QLabel(self.box_spread)
         self.bxs_label_index.setObjectName(u"bxs_label_index")
-        self.bxs_label_index.setGeometry(QRect(410, 130, 111, 20))
+        self.bxs_label_index.setGeometry(QRect(320, 85, 111, 20))
+        self.bxs_label_index.setAlignment(Qt.AlignCenter)
         self.bxs_comboBox_index = QComboBox(self.box_spread)
         self.bxs_comboBox_index.setObjectName(u"bxs_comboBox_index")
-        self.bxs_comboBox_index.setGeometry(QRect(540, 120, 141, 41))
+        self.bxs_comboBox_index.setGeometry(QRect(310, 120, 141, 41))
+        self.bxs_comboBox_index.setAutoFillBackground(False)
+        self.bxs_comboBox_index.setStyleSheet(u"color: rgb(255, 15, 51);\n"
+"background-color: rgb(40, 44, 52);\n"
+"")
         self.bxs_label_expiry = QLabel(self.box_spread)
         self.bxs_label_expiry.setObjectName(u"bxs_label_expiry")
-        self.bxs_label_expiry.setGeometry(QRect(760, 130, 121, 20))
+        self.bxs_label_expiry.setGeometry(QRect(1100, 85, 121, 20))
+        self.bxs_label_expiry.setAlignment(Qt.AlignCenter)
         self.bxs_comboBox_expiry = QComboBox(self.box_spread)
         self.bxs_comboBox_expiry.setObjectName(u"bxs_comboBox_expiry")
-        self.bxs_comboBox_expiry.setGeometry(QRect(880, 120, 231, 41))
-        self.bxs_comboBox_expiry.setLayoutDirection(Qt.RightToLeft)
+        self.bxs_comboBox_expiry.setGeometry(QRect(1060, 120, 211, 41))
+        self.bxs_comboBox_expiry.setLayoutDirection(Qt.LeftToRight)
+        self.bxs_comboBox_expiry.setStyleSheet(u"color: rgb(255, 15, 51);\n"
+"background-color: rgb(40, 44, 52);\n"
+"")
         self.bxs_horizontalSlider_rate = QSlider(self.box_spread)
         self.bxs_horizontalSlider_rate.setObjectName(u"bxs_horizontalSlider_rate")
         self.bxs_horizontalSlider_rate.setGeometry(QRect(60, 338, 1111, 20))
@@ -1191,7 +1204,7 @@ class Ui_MainWindow(object):
         self.bxs_lineEdit_lower_strike.setGeometry(QRect(207, 255, 113, 28))
         self.bxs_label_spread = QLabel(self.box_spread)
         self.bxs_label_spread.setObjectName(u"bxs_label_spread")
-        self.bxs_label_spread.setGeometry(QRect(335, 260, 111, 20))
+        self.bxs_label_spread.setGeometry(QRect(335, 260, 171, 20))
         self.bxs_label_amount = QLabel(self.box_spread)
         self.bxs_label_amount.setObjectName(u"bxs_label_amount")
         self.bxs_label_amount.setGeometry(QRect(730, 240, 101, 20))
@@ -1203,7 +1216,17 @@ class Ui_MainWindow(object):
         self.bxs_lineEdit_amount.setGeometry(QRect(839, 235, 71, 28))
         self.bxs_label_underlying_price = QLabel(self.box_spread)
         self.bxs_label_underlying_price.setObjectName(u"bxs_label_underlying_price")
-        self.bxs_label_underlying_price.setGeometry(QRect(335, 220, 111, 20))
+        self.bxs_label_underlying_price.setGeometry(QRect(335, 220, 221, 20))
+        self.bxs_label_type = QLabel(self.box_spread)
+        self.bxs_label_type.setObjectName(u"bxs_label_type")
+        self.bxs_label_type.setGeometry(QRect(830, 85, 121, 20))
+        self.bxs_label_type.setAlignment(Qt.AlignCenter)
+        self.bxs_comboBox_type = QComboBox(self.box_spread)
+        self.bxs_comboBox_type.setObjectName(u"bxs_comboBox_type")
+        self.bxs_comboBox_type.setGeometry(QRect(800, 120, 201, 41))
+        self.bxs_comboBox_type.setStyleSheet(u"color: rgb(255, 15, 51);\n"
+"background-color: rgb(40, 44, 52);\n"
+"")
         self.stackedWidget.addWidget(self.box_spread)
 
         self.verticalLayout_15.addWidget(self.stackedWidget)
@@ -1354,7 +1377,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -1518,6 +1541,7 @@ class Ui_MainWindow(object):
         self.bxs_label_amount.setText(QCoreApplication.translate("MainWindow", u"Amount:", None))
         self.bxs_label_nominal.setText(QCoreApplication.translate("MainWindow", u"Nominal:", None))
         self.bxs_label_underlying_price.setText(QCoreApplication.translate("MainWindow", u"Price:", None))
+        self.bxs_label_type.setText(QCoreApplication.translate("MainWindow", u"Type", None))
         self.btn_message.setText(QCoreApplication.translate("MainWindow", u"Message", None))
         self.btn_print.setText(QCoreApplication.translate("MainWindow", u"Print", None))
         self.btn_logout.setText(QCoreApplication.translate("MainWindow", u"Logout", None))

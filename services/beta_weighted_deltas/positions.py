@@ -3,7 +3,7 @@ from datetime import datetime
 from ibapi.contract import Contract as ibContract
 
 from core import Core, CoreDistributor
-from services.beta_weighted_deltas.contracts import create_benchmark_contract, create_position_contract
+from services.contracts import create_benchmark_contract, create_position_contract
 
 
 class Position:
@@ -88,7 +88,7 @@ class Position:
         return self.symbol
 
     def set_error_flag(self, flag: bool = False, **kwargs):
-        print(f'Error flag {flag}')
+        print(f'Error flag {flag} triggered for {self.contract}.')
         self.error_flag = flag
 
     def set_greeks(self, greeks: dict):

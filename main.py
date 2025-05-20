@@ -10,16 +10,15 @@ from ibapi.contract import Contract
 from core import Core, CoreDistributor
 from gui.frame import MainWindow
 
-from services import controller
+from services.controller import Backend
+from services.tws_api import TWSConDistributor
 
 faulthandler.enable()
 
 if __name__ == "__main__":
     core: Core = CoreDistributor.get_core()
-    core.load_config()
-    start_gui = True
-    start_tws_inst = True
-    start_controller_loop = True
+    start_gui_cond = True
+    start_backend_cond = True
     tester = False
 
 
@@ -34,56 +33,38 @@ if __name__ == "__main__":
         # window.show()
         # app.exec_()
 
-    if start_gui:
+    if start_gui_cond:
         Thread(target=gui).start()
 
-    def tws_con():
-        return controller.TWSRequests()
+    def start_backend():
+        Backend().control_loop()
 
-    if start_tws_inst:
-        tws_con = tws_con()
+    if start_backend_cond:
+        start_backend()
 
-    def tws_loop(tws_con):
-        tws_con.control_loop()
+    def test_lab():
+        tws_con = TWSConDistributor.get_con()
 
-    if start_controller_loop:
-        tws_loop(tws_con)
-
-    def test_lab(tws_con):
         rc = Contract()
-        rc.symbol = 'SPY'
-        rc.secType = 'STK'
+        rc.symbol = 'SPX'
+        rc.secType = 'IND'
         rc.currency = 'USD'
-        rc.exchange = 'SMART'
-        print(rc)
-        rc2 = Contract()
-        rc2.symbol = 'BMW'
-        rc2.secType = 'STK'
-        rc2.currency = 'EUR'
-        rc2.exchange = 'IBIS'
-        print(rc2)
-        #tws_con.tws_api.reqFundamentalData(131 , rc, "ReportSnapshot", "")
-        #tws_con.tws_api.reqContractDetails(132 , rc, "RESC", "")
-        from datetime import datetime
-        tws_con.tws_api.reqHistoricalData(reqId=456,
-                          contract=rc2,
-                          endDateTime=datetime.today().strftime("%Y%m%d-%H:%M:%S"),
-                          durationStr='1 Y',
-                          barSizeSetting='1 day',
-                          whatToShow="MIDPOINT",
-                          useRTH=1,
-                          formatDate=1,
-                          keepUpToDate=False,
-                          chartOptions=[])
+        rc.exchange = 'CBOE'
+        print('In Tester')
 
         print(12354)
         sleep(999999)
 
     if tester:
-        test_lab(tws_con)
+        test_lab()
 
 
-    """
-    IDEA: Add a dollar-beta weighted column for exposure (Mark Meldrum: https://youtu.be/FYszi2Otsrw?si=K62RdfPEi0if3hC2&t=1656)
-    """
+"""
+TODO: Make reqIDs and req_hashtable thread-safe
+"""
+
+
+"""
+IDEA: Add a dollar-beta weighted column for exposure (Mark Meldrum: https://youtu.be/FYszi2Otsrw?si=K62RdfPEi0if3hC2&t=1656)
+"""
 
