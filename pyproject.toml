@@ -10,4 +10,5 @@ dependencies = [
     "pandas>=2.2.3",
     "pyside6>=6.9.0",
     "requests>=2.32.3",
+    "yfinance>=0.2.61",
 ]
