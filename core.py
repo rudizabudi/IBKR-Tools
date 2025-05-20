@@ -1,8 +1,14 @@
-from dataclasses import dataclass
+from collections import defaultdict
+from enum import StrEnum
 from datetime import datetime
 import json
 import os
 import threading
+from typing import Callable
+
+
+from ibapi.contract import Contract as ibContract
+from gui.tabs.tabs import Tabs
 
 #from services.contracts import Position
 
@@ -12,10 +18,14 @@ type DataHandlerInstance = 'DataHandlerInstance'
 type QtObj = 'QtObj'
 type QTFunc = 'QTFunc'
 
+type _T = 'T'
+
 
 class Core:
     def __init__(self):
-        pass
+        self.load_config()
+        self.create_var_space()
+
 
     @classmethod
     def load_config(cls):
@@ -59,37 +69,44 @@ class Core:
         except KeyError as e:
             raise KeyError(f'Missing key in config file: {e}')
 
-    controller_loop_interval: int = 60  # in secs
-    reqId_hashmap: dict = {}
-    reqId: int = 1
 
-    account_list: list[str] = []
+    @classmethod
+    def create_var_space(cls):
+        #TODO: Move as much as possible away from globalish space
 
-    active_tab: str = ''
+        cls.threading_events: dict[str, threading.Event] = {}
 
-    raw_positions: dict[str, dict[str, any]] = {}
+        cls.controller_loop_interval: int = 60  # in secs
 
-    requesting_positions: bool = False
-    positions: list[ContractInstance] = []
-    positions_str_sorted: list[str] = []
+        cls.account_list: list[str] = []
 
-    pos_betas: dict[str: float] = {}
+        cls.active_tab: Tabs = Tabs.HOME
 
-    table_contents: dict[str: list[str | float]] = {}
+        cls.raw_positions: dict[str, dict[str, any]] = {}
 
-    item_register: dict[str: QtObj] = {}
-    underlying_prices: dict[str: float] = {}
+        cls.requesting_positions: bool = False
+        cls.positions: list[ContractInstance] = []
+        cls.positions_str_sorted: list[str] = []
 
-    bwd_update_refresh: QTFunc = None
+        cls.pos_betas: dict[str: float] = {}
 
-    widget_registry: dict[str: dict[str: QtObj]] = {}
-    tab_instances: dict[str: dict[str: DataHandlerInstance] | DataHandlerInstance] = {}
-    #TODO: Global event trigger class to handle services <-> gui interactions
-    project_font = None
+        cls.table_contents: dict[str: list[str | float]] = {}
+
+        cls.item_register: dict[str: QtObj] = {}
+        cls.underlying_prices: dict[str: float] = {}
+
+        cls.bwd_update_refresh: QTFunc = None
+
+        cls.bxs_index_contract: dict[str, ibContract] = {}
+
+        cls.widget_registry: dict[str: dict[str: QtObj]] = {}
+        cls.tab_instances: dict[str: dict[str: DataHandlerInstance] | DataHandlerInstance] = {}
+        #TODO: Global event trigger class to handle services <-> gui interactions
+        cls.project_font = None
 
 
-@dataclass
 class CoreDistributor:
+    #TODO: Make a wrapper out of this
     _lock = threading.Lock()
     _core_instance = None
 
@@ -103,5 +120,23 @@ class CoreDistributor:
         return cls._core_instance
 
 
+class ReqId:
+    _lock = threading.Lock()
+    reqId_hashmap: defaultdict = defaultdict()
+    _reqId = 0
+
+    @classmethod
+    def register_reqId(cls, target: Callable = None):
+        with cls._lock:
+            cls._reqId += 1
+            cls.reqId_hashmap[cls._reqId] = target
+            return cls._reqId
+
+
 def tprint(text: str = '', *args, **kwargs):
     print(f'{datetime.now().strftime('%H:%M:%S')} : {text}')
+
+
+class RequestState(StrEnum):
+    REQUESTED = 'Requested'
+    RECEIVED = 'Received'
