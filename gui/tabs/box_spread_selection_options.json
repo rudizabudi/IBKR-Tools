@@ -2,38 +2,98 @@
     "currencies": {
         "EUR": {
             "DAX": {
-                "symbol": "DAX"
+                "symbol": "DAX",
+                "exchange": "EUREX",
+                "yf_symbol": "^gdaxi",
+                "types": {
+                    "ODAX": "DAX",
+                    "ODXS": "Micro-DAX",
+                    "ODAP": "End-of-Day"
+                }
             },
-            "PX1": {
-                "symbol": "CAC40"
+            "CAC": {
+                "symbol": "CAC40",
+                "exchange": "MONEP",
+                "yf_symbol": "^fchi",
+                "types": {
+                    "PXA": "CAC40"
+                }
             }
         },
         "USD": {
             "SPX": {
-                "symbol": "SPX"
+                "symbol": "SPX",
+                "exchange": "CBOE",
+                "yf_symbol": "^spx",
+                "types": {
+                    "SPX": "Monthly",
+                    "SPXW": "Weekly"
+                }
+            },
+            "XSP": {
+                "symbol": "XSP",
+                "exchange": "CBOE",
+                "yf_symbol": "^xsp",
+                "types": {
+                    "XSP": "Mini"
+                }
+            },
+            "NANOS": {
+                "symbol": "NANOS",
+                "exchange": "CBOE",
+                "yf_symbol": "^nanos",
+                "types": {
+                    "NANOS": "NANO"
+                }
             },
             "NDX": {
-                "symbol": "NDX"
+                "symbol": "NDX",
+                "exchange": "NASDAQ",
+                "yf_symbol": "^ndx",
+                "types": {
+                    "NDX": "Monthly",
+                    "NDXP": "Weekly"
+                }
             }
         },
         "GBP": {
             "FTSE": {
-                "symbol": "Z"
+                "symbol": "Z",
+                "exchange": "ICEEU",
+                "yf_symbol": "^ftse",
+                "types": {
+                    "ESX": "FTSE500"
+                }
             }
         },
         "CHF": {
             "SMI": {
-                "symbol": "SMI"
+                "symbol": "SMI",
+                "exchange": "EUREX",
+                "yf_symbol": "^ssmi",
+                "types": {
+                    "OSMI": "SMI"
+                }
             }
         },
         "JPY": {
             "NKY": {
-                "symbol": "N225"
+                "symbol": "N225",
+                "exchange": "OSE.JPN",
+                "yf_symbol": "^n225",
+                "types": {
+                    "225": "Nikkei225"
+                }
             }
         },
         "CAD": {
             "TSE": {
-                "symbol": "TSE60"
+                "symbol": "TSE60",
+                "exchange": "TSE",
+                "yf_symbol": "TX60.TS",
+                "types": {
+                    "SXO": "TSE60"
+                }
             }
         }
     }
