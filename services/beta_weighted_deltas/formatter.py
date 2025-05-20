@@ -130,6 +130,9 @@ class TableContentGenerator:
             gamma_sum_negative.append(float(self.table_contents[header][0][7].split(' | ')[1]))
             not_pos_sum.append(float(self.table_contents[header][0][8].replace(',', '')))
 
+        if not ivol_avg:
+            ivol_avg = [0]
+
         self.total_line[0] = f'TOTAL'
         self.total_line[1] = f'{mean(beta_avg):.2f}'
         self.total_line[3] = f'{mean(ivol_avg):.0f}%'
