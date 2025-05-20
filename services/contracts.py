@@ -25,6 +25,7 @@ def create_position_contract(**kwargs) -> ibContract:
     contract.secType = kwargs['secType']
     contract.exchange = kwargs.get('exchange', 'SMART')
     contract.currency = kwargs['currency']
+
     if opt:
         contract.right = kwargs['right']
         contract.strike = float(kwargs['strike'])
@@ -33,3 +34,17 @@ def create_position_contract(**kwargs) -> ibContract:
         #     self.contract.multiplier = "50"
 
     return contract
+
+
+def create_index_contract(data: dict[str, str], json_data: dict) -> ibContract:
+    contract = ibContract()
+    contract.symbol = json_data['currencies'][data['currency']][data['index']]['symbol']
+    contract.secType = 'IND'
+    contract.exchange = json_data['currencies'][data['currency']][data['index']]['exchange']
+    contract.currency = data['currency']
+    contract.types = json_data['currencies'][data['currency']][data['index']]['types']
+    contract.yf_symbol = json_data['currencies'][data['currency']][data['index']]['yf_symbol']
+
+    return contract
+
+
