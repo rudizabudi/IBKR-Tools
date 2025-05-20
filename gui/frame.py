@@ -10,6 +10,7 @@ from gui.app_settings import Settings
 from gui.ui_main import Ui_MainWindow
 from gui.tabs.beta_weighted_deltas import BetaWeightedDeltas
 from gui.tabs.box_spread import BoxSpread
+from gui.tabs.tabs import Tabs
 from gui.font_factory import font_factory
 
 os.environ["QT_FONT_DPI"] = "96"
@@ -49,7 +50,7 @@ class MainWindow(QMainWindow):
         self.ui.stackedWidget.setCurrentWidget(self.core.tab_instances['home'])
 
         self.show()
-        self.set_active_tab('home')
+        self.set_active_tab(Tabs.HOME)
 
     # Shared button registry
     def register_events(self):
@@ -80,7 +81,8 @@ class MainWindow(QMainWindow):
                            'line_upper_strike': self.ui.bxs_lineEdit_upper_strike, 'label_lower_strike': self.ui.bxs_label_lower_strike,
                            'line_lower_strike': self.ui.bxs_lineEdit_lower_strike, 'label_spread': self.ui.bxs_label_spread,
                            'label_amount': self.ui.bxs_label_amount, 'line_amount': self.ui.bxs_lineEdit_amount,
-                           'label_nominal': self.ui.bxs_label_nominal, 'price': self.ui.bxs_label_underlying_price},
+                           'label_nominal': self.ui.bxs_label_nominal, 'label_price': self.ui.bxs_label_underlying_price,
+                           'label_type': self.ui.bxs_label_type, 'comboBox_type': self.ui.bxs_comboBox_type},
             'misc': {'title_right_info': self.ui.titleRightInfo, 'leftMenuBg': self.ui.leftMenuBg, 'contentTopBg': self.ui.contentTopBg,
                      'rightTopLabel': self.ui.titleRightInfo}
         }
@@ -116,14 +118,14 @@ class MainWindow(QMainWindow):
                 stacked_widget.setCurrentWidget(self.ui.home)
                 UIFunctions.resetStyle(self, btn_name)
                 btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
-                self.set_active_tab('home')
+                self.set_active_tab(Tabs.HOME)
 
             # BWD widget tab
             case "btn_bwd":
                 stacked_widget.setCurrentWidget(self.ui.beta_weighted_deltas)
                 UIFunctions.resetStyle(self, btn_name)
                 btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
-                self.set_active_tab('beta_weighted_deltas')
+                self.set_active_tab(Tabs.BWD)
                 #self.core.tab_instances['beta_weighted_deltas'].tab_trigger()
 
             # Box Spread tab
@@ -131,13 +133,14 @@ class MainWindow(QMainWindow):
                 stacked_widget.setCurrentWidget(self.ui.box_spread)
                 UIFunctions.resetStyle(self, btn_name)
                 btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
-                self.set_active_tab('box_spread')
+                self.set_active_tab(Tabs.BXS)
+                self.core.tab_instances['box_spread'].first_show()
 
             case _:
                 print(f'Unregistered button clicked: {btn_name}')
 
-    def set_active_tab(self, tab_name):
-        self.core.active_tab = tab_name
+    def set_active_tab(self, tab: Tabs):
+        self.core.active_tab = tab
 
     def mousePressEvent(self, event):
         # SET DRAG POS WINDOW
