@@ -43,7 +43,9 @@ def font_factory(core=None):
                     (wr['box_spread']['label_nominal'], 14),
                     (wr['box_spread']['label_selected_rate'], 14),
                     (wr['box_spread']['label_selected_rate'], 14),
-                    (wr['box_spread']['price'], 14)
+                    (wr['box_spread']['label_price'], 14),
+                    (wr['box_spread']['label_type'], 14),
+                    (wr['box_spread']['comboBox_type'], 14)
     ]
 
     for obj, size in font_objects:
