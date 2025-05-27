@@ -1,4 +1,4 @@
-import threading
+from threading import Event, Lock, Thread
 import time
 
 from ibapi.client import EClient
@@ -20,7 +20,7 @@ class TWSCon(EWrapper, EClient):
         self.request_end: dict[str, RequestState] = {}
 
         self.connect(self.core.HOST_IP, self.core.API_PORT, self.core.CLIENT_ID)
-        self.t: threading.Thread = threading.Thread(target=self.run, daemon=True)
+        self.t: Thread = Thread(target=self.run, daemon=True)
         self.t.start()
         time.sleep(1)
 
@@ -36,10 +36,15 @@ class TWSCon(EWrapper, EClient):
         self.core.widget_registry['misc']['rightTopLabel'].setText('🔴 Not connected.   ')
 
     def error(self, reqId, errorCode, errorString):
-        tprint(f'{reqId}, {errorCode}, {errorString}')
+        if errorCode not in (200,):
+            tprint(f'{reqId}, {errorCode}, {errorString}')
+
+        if reqId in ReqId.reqId_hashmap.keys():
+            ReqId.reqId_hashmap[reqId](error=True)
 
     def contractDetails(self, reqId: int, contractDetails):
-        ReqId.reqId_hashmap[reqId] = contractDetails
+        #print(f'ContractDetails Callback  {contractDetails.__dict__=}')
+        ReqId.reqId_hashmap[reqId](contractDetails=contractDetails)
 
     def managedAccounts(self, accountsList):
         super().managedAccounts(accountsList)
@@ -69,7 +74,7 @@ class TWSCon(EWrapper, EClient):
             ReqId.reqId_hashmap[reqId](data)
 
     def updatePortfolio(self, contract: Contract, position: float, marketPrice: float, marketValue: float, averageCost: float, unrealizedPNL: float, realizedPNL: float, accountName: str):
-        #tprint(f'updatePortfolio: {contract.symbol}, {position}, {marketPrice}, {marketValue}, {averageCost}, {unrealizedPNL}, {realizedPNL}, {accountName}')
+        tprint(f'updatePortfolio: {contract.symbol}, {position}, {marketPrice}, {marketValue}, {averageCost}, {unrealizedPNL}, {realizedPNL}, {accountName}')
 
         # for x in dir(contract):
         #     tprint(f'{x}: {getattr(contract, x)}')
@@ -83,7 +88,7 @@ class TWSCon(EWrapper, EClient):
                     'lastTradeDateOrContractMonth': contract.lastTradeDateOrContractMonth,
                     'conId': contract.conId}
 
-        self.core.raw_positions[contract['conId']] = {
+        self.core.bwd_raw_positions[contract['conId']] = {
             'contract': contract,
             'position': position,
             'marketPrice': marketPrice,
@@ -105,11 +110,13 @@ class TWSCon(EWrapper, EClient):
 
     def accountDownloadEnd(self, accountName: str):
         super().accountDownloadEnd(accountName)
-
+        print('accountDownloadEnd')
+        if isinstance(self.core.threading_events['bwd_reqAccountUpdates'], Event) and not self.core.threading_events['bwd_reqAccountUpdates'].is_set():
+            self.core.threading_events['bwd_reqAccountUpdates'].set()
 
 
 class TWSConDistributor:
-    _lock = threading.Lock()
+    _lock = Lock()
     _tws_con = None
 
     @classmethod

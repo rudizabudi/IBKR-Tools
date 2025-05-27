@@ -78,11 +78,13 @@ class MainWindow(QMainWindow):
                            'slider_rate': self.ui.bxs_horizontalSlider_rate, 'label_benchmark_rate': self.ui.bxs_label_benchmark_rate,
                            'label_lower_rate': self.ui.bxs_label_lower_rate, 'label_higher_rate': self.ui.bxs_label_higher_rate,
                            'label_selected_rate': self.ui.bxs_label_selected_rate, 'label_upper_strike': self.ui.bxs_label_upper_strike,
-                           'line_upper_strike': self.ui.bxs_lineEdit_upper_strike, 'label_lower_strike': self.ui.bxs_label_lower_strike,
-                           'line_lower_strike': self.ui.bxs_lineEdit_lower_strike, 'label_spread': self.ui.bxs_label_spread,
+                           'comboBox_upper_strike': self.ui.bxs_comboBox_upper_strike, 'label_lower_strike': self.ui.bxs_label_lower_strike,
+                           'comboBox_lower_strike': self.ui.bxs_comboBox_lower_strike, 'label_spread': self.ui.bxs_label_spread,
                            'label_amount': self.ui.bxs_label_amount, 'line_amount': self.ui.bxs_lineEdit_amount,
-                           'label_nominal': self.ui.bxs_label_nominal, 'label_price': self.ui.bxs_label_underlying_price,
-                           'label_type': self.ui.bxs_label_type, 'comboBox_type': self.ui.bxs_comboBox_type},
+                           'label_nominal': self.ui.bxs_label_nominal, 'label_underlying_price': self.ui.bxs_label_underlying_price,
+                           'label_type': self.ui.bxs_label_type, 'comboBox_type': self.ui.bxs_comboBox_type,
+                           'label_multiplier': self.ui.bxs_label_multiplier,
+                           'label_initial': self.ui.bxs_label_initial, 'label_nominal': self.ui.bxs_label_nominal},
             'misc': {'title_right_info': self.ui.titleRightInfo, 'leftMenuBg': self.ui.leftMenuBg, 'contentTopBg': self.ui.contentTopBg,
                      'rightTopLabel': self.ui.titleRightInfo}
         }

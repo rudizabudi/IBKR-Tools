@@ -60,7 +60,6 @@ class IndexPrice:
         cls.core.threading_events['bxs_contract_price_received'].set()
         print(f'Index price requested for {index_contract}')
 
-
     @classmethod
     def request_price(cls, index_contract: ibContract):
         if not cls.check_update(index_contract, datetime.now()):
@@ -86,10 +85,8 @@ class IndexPrice:
                                      'price': float(price['close'])
                                      }
 
-        print(f'{cls.last_prices[contract]}')
-
     @classmethod
-    def check_update(cls, contract: ibContract, dt: datetime):
+    def check_update(cls, contract: ibContract, dt: datetime) -> bool:
         if contract not in cls.last_prices.keys():
             return True
         if cls.last_prices[contract]['last_request'] <= dt - timedelta(minutes=cls.UPDATE_TIMER):

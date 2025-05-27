@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from ibapi.contract import Contract as ibContract
 
 from core import CoreDistributor
@@ -46,5 +47,20 @@ def create_index_contract(data: dict[str, str], json_data: dict) -> ibContract:
     contract.yf_symbol = json_data['currencies'][data['currency']][data['index']]['yf_symbol']
 
     return contract
+
+
+def create_expiry_dummy_contract(index_contract: ibContract, expiry_date: datetime, strike: float) -> ibContract:
+
+    contract = ibContract()
+    contract.symbol = index_contract.symbol
+    contract.secType = 'OPT'
+    contract.exchange = index_contract.exchange
+    contract.currency = index_contract.currency
+    contract.strike = strike
+    contract.right = 'C'
+    contract.lastTradeDateOrContractMonth = expiry_date.strftime('%Y%m%d')
+
+    return contract
+
 
 

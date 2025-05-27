@@ -1,7 +1,10 @@
 from collections import defaultdict
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
+from functools import partial
+
 from ibapi.contract import Contract as ibContract
 from itertools import chain
+from threading import Event
 from time import sleep
 
 from core import CoreDistributor, ReqId
@@ -32,26 +35,33 @@ class BXSIndexContracts:
 
 class BXSOptionChainData:
     cached_symbols = []
-    expiries = defaultdict(list)
-    strikes = defaultdict(list)
-    multipliers = defaultdict(list)
+    expiries: defaultdict[str, list[dt]] = defaultdict(list)
+    strikes: defaultdict[str, list[float]] = defaultdict(list)
+    multipliers: defaultdict[str, list[float]] = defaultdict(list)
+
+    MINIMUM_FUTURE_OFFSET: int = 2  # days
 
     @classmethod
-    def set_data(cls, symbol: str, r_expiries: list[float], r_strikes: list[float], r_multiplier: str):
+    def set_data(cls, symbol: str, r_expiries: tuple[float], r_strikes: tuple[float], r_multiplier: str):
         if symbol not in cls.cached_symbols:
             cls.cached_symbols.append(symbol)
+
+        r_expiries = filter(lambda x: dt.strptime(x, '%Y%m%d') - timedelta(days=2) >= dt.now(), r_expiries)
 
         cls.expiries[symbol].extend(dt.strptime(x, '%Y%m%d') for x in r_expiries if x not in cls.expiries[symbol])
         cls.strikes[symbol].extend(x for x in r_strikes if x not in cls.strikes[symbol])
         cls.multipliers[symbol].extend(float(x) for x in r_multiplier.split(',') if float(x) not in cls.multipliers[symbol])
 
-
 class conIdCache:
     conIDs = {}
 
     @classmethod
-    def set_conId(cls, symbol, conId):
-        cls.conIDs[symbol] = conId
+    def set_conId(cls, symbol, contractDetails):
+        cls.conIDs[symbol] = contractDetails.contract.conId
+
+        core = CoreDistributor.get_core()
+        if core.threading_events['reqConid']:
+            core.threading_events['reqConid'].set()
 
     @classmethod
     def get_conId(cls, symbol) -> int:
@@ -59,18 +69,19 @@ class conIdCache:
             return None
         return cls.conIDs[symbol]
 
-def request_conId(index_contract: ibContract, con: TWSCon) -> int:
+def request_conId(index_contract: ibContract, con: TWSCon, core) -> int:
 
     if (conId := conIdCache.get_conId(index_contract.symbol)) is None:
         reqId = ReqId.register_reqId()
 
-        ReqId.reqId_hashmap[reqId] = None
-        con.reqContractDetails(reqId, index_contract)
-        while ReqId.reqId_hashmap[reqId] is None: #TODO: Fix idling
-            sleep(0.1)
+        conId_callback = partial(conIdCache.set_conId, symbol=index_contract.symbol)
 
-        conId = ReqId.reqId_hashmap[reqId].contract.conId
-        conIdCache.set_conId(index_contract.symbol, conId)
+        ReqId.reqId_hashmap[reqId] = conId_callback
+        core.threading_events['reqConid'] = Event()
+        con.reqContractDetails(reqId, index_contract)
+        core.threading_events['reqConid'].wait()
+
+        conId = conIdCache.get_conId(index_contract.symbol)
 
     return conId
 
@@ -79,10 +90,9 @@ def request_index_expiries(index_contract: ibContract):
     core = CoreDistributor.get_core()
     tws_con = TWSConDistributor.get_con()
 
-    conId = request_conId(index_contract, tws_con)
+    conId = request_conId(index_contract, tws_con, core)
     reqId = ReqId.register_reqId(BXSOptionChainData.set_data)
 
-    print(f'Requesting expiries for {index_contract.symbol}')
     tws_con.reqSecDefOptParams(
             reqId=reqId,
             underlyingSymbol=index_contract.symbol,
@@ -90,7 +100,7 @@ def request_index_expiries(index_contract: ibContract):
             underlyingSecType='IND',
             underlyingConId=conId)
 
-    while not any(map(lambda x: x in BXSOptionChainData.cached_symbols, index_contract.types)):
+    while not any(map(lambda x: x in BXSOptionChainData.cached_symbols, index_contract.types)): #TODO: Fix loop
         sleep(0.1)
 
     core.threading_events['bxs_contract_details_received'].set()

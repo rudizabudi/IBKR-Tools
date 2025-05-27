@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import os
 import threading
-from typing import Callable
+from typing import Any, Callable
 
 
 from ibapi.contract import Contract as ibContract
@@ -14,7 +14,6 @@ from gui.tabs.tabs import Tabs
 
 type ContractInstance = 'ContractInstance'
 type SubPageInstance = 'SubPageInstance'
-type DataHandlerInstance = 'DataHandlerInstance'
 type QtObj = 'QtObj'
 type QTFunc = 'QTFunc'
 
@@ -74,7 +73,7 @@ class Core:
     def create_var_space(cls):
         #TODO: Move as much as possible away from globalish space
 
-        cls.threading_events: dict[str, threading.Event] = {}
+        cls.threading_events: defaultdict[str, threading.Event] = {}
 
         cls.controller_loop_interval: int = 60  # in secs
 
@@ -84,7 +83,6 @@ class Core:
 
         cls.raw_positions: dict[str, dict[str, any]] = {}
 
-        cls.requesting_positions: bool = False
         cls.positions: list[ContractInstance] = []
         cls.positions_str_sorted: list[str] = []
 
@@ -99,8 +97,9 @@ class Core:
 
         cls.bxs_index_contract: dict[str, ibContract] = {}
 
-        cls.widget_registry: dict[str: dict[str: QtObj]] = {}
-        cls.tab_instances: dict[str: dict[str: DataHandlerInstance] | DataHandlerInstance] = {}
+        cls.widget_registry: dict[str, dict[str, QtObj]] = {}
+
+        cls.tab_instances: dict[str, 'SubClassInstance'] = {}
         #TODO: Global event trigger class to handle services <-> gui interactions
         cls.project_font = None
 

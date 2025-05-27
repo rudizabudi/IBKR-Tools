@@ -1,12 +1,16 @@
 from datetime import datetime
 from enum import StrEnum
+
+from PySide6.QtCore import QThread, QObject
+from ibapi.contract import Contract as ibContract
 import json
-from threading import Thread, Event as TEvent
+from threading import Event as TEvent, Lock, Thread
 import os
 
 from core import Core, CoreDistributor
 from services.box_spread.request_prices import IndexPrice
 from services.box_spread.request_expiries import BXSOptionChainData, BXSIndexContracts, request_index_expiries
+from services.box_spread.check_existence import check_strikes, ContractExistence, UpdateGuiStrikes
 from services.contracts import create_index_contract
 
 type CoreObj = 'CoreObj'
@@ -15,7 +19,7 @@ type QtObj = 'QtObj'
 
 class BoxSpread:
     def __init__(self):
-
+        super().__init__()
         self.core: Core = CoreDistributor.get_core()
 
         self.tab_registry = self.core.widget_registry['box_spread']
@@ -26,6 +30,8 @@ class BoxSpread:
         self.box_spread_type = BoxSpreadType.LEND
         self.box_spread_type_btn(change=False)
 
+        self.tab_trigger = {'strikes': UpdateGuiStrikes()}
+
         self.handle_widgets()
         self.register_events()
 
@@ -35,8 +41,14 @@ class BoxSpread:
         self.tab_registry['comboBox_currency'].currentIndexChanged.connect(lambda: (print('a'), self.input_dependency_manager()))
         self.tab_registry['comboBox_index'].currentIndexChanged.connect(lambda x: (print('b', x), self.input_dependency_manager()))
         self.tab_registry['comboBox_type'].currentIndexChanged.connect(lambda: (print('c'), self.input_dependency_manager()))
+        self.tab_registry['comboBox_upper_strike'].currentIndexChanged.connect(lambda: print('d'), self.handle_strike_change())
+        self.tab_registry['comboBox_lower_strike'].currentIndexChanged.connect(lambda: print('e'), self.handle_strike_change())
 
+        self.tab_trigger['strikes'].trigger_strike_update.connect(self.tester)
         self.tab_registry['slider_rate'].sliderMoved.connect(lambda x: print(123, x))
+
+    def tester(self):
+        print('Signal received')
 
     def first_show(self):
         if not self.started_up:
@@ -44,7 +56,6 @@ class BoxSpread:
             self.started_up = True
 
     def input_dependency_manager(self):
-        print('IDM started.')
         input_widgets = (self.tab_registry['comboBox_currency'], self.tab_registry['comboBox_index'], self.tab_registry['comboBox_type'])
         tmp_blocked_events = [x.blockSignals(True) for x in input_widgets]
 
@@ -74,7 +85,10 @@ class BoxSpread:
 
             if not all([x in BXSOptionChainData.cached_symbols for x in current_contract.types.keys()]):
                 index_request_thread = Thread(target=request_index_expiries, args=(current_contract,), daemon=True)
+                print('t1')
                 index_request_thread.start()
+                print('t2')
+                # INPUT THE NEW THREADING HERE!
 
         self.tab_registry['comboBox_type'].clear()
         self.tab_registry['comboBox_type'].addItems(self.selection_data['currencies'][data['currency']][data['index']]['types'].values())
@@ -87,14 +101,19 @@ class BoxSpread:
         #Type
         types = self.selection_data['currencies'][selected_currency][selected_index]['types']
 
-        type_ticker = [k for k, v in types.items() if v == selected_type][0]
+        #type_ticker = [k for k, v in types.items() if v == selected_type][0]
+        selected_type_ticker = [k for k, v in self.selection_data['currencies'][selected_currency][selected_index]['types'].items() if v == selected_type][0]
+        #print(f'{type_ticker}')
+        print(f'{selected_type_ticker}')
 
         if self.core.threading_events['bxs_contract_details_received']:
             self.core.threading_events['bxs_contract_details_received'].wait()
             if isinstance(index_request_thread, Thread):
+                print('t3')
                 index_request_thread.join()
-
-        expiries_sorted = list(dict.fromkeys(sorted(BXSOptionChainData.expiries[type_ticker])))
+                print('t4')
+        print(1)
+        expiries_sorted = list(dict.fromkeys(sorted(BXSOptionChainData.expiries[selected_type_ticker])))
 
         expiries = [datetime.strftime(x, '%d%b%y') for x in expiries_sorted]
 
@@ -105,30 +124,124 @@ class BoxSpread:
             self.tab_registry['comboBox_expiry'].setCurrentIndex(selection)
         else:
             self.tab_registry['comboBox_expiry'].setCurrentIndex(0)
-        selected_expiry = self.tab_registry['comboBox_expiry'].currentText()
+            selected_expiry = self.tab_registry['comboBox_expiry'].currentText()
+        print(2)
+
+        #multiplier
+        if multiplier := BXSOptionChainData.multipliers[selected_type_ticker][0]:
+            multiplier_text = f'Multiplier: {int(multiplier)}'
+        else:
+            multiplier_text = f'Multiplier: -'
+
+        self.tab_registry['label_multiplier'].setText(multiplier_text)
+
 
         #Price
         if selected_index:
             self.core.threading_events['bxs_contract_price_received'] = TEvent()
             price_request_thread = Thread(target=IndexPrice.request_price, args=(current_contract,), daemon=True)
+            print('t5')
             price_request_thread.start()
-
+            print('t6')
             self.core.threading_events['bxs_contract_price_received'].wait()
             price_request_thread.join()
+            print('t7')
 
             price_text = f'Price: {IndexPrice.get_price(current_contract):,.0f}'
         else:
             price_text = 'Price:'
 
-        self.tab_registry['label_price'].setText(price_text)
+        self.tab_registry['label_underlying_price'].setText(price_text)
 
-        print('Price set')
+        if not selected_expiry:
+            return
 
+        selected_expiry_dt = datetime.strptime(selected_expiry, '%d%b%y')
+        checking_strikes_thread = Thread(target=check_strikes, args=(current_contract, selected_expiry_dt, self), daemon=True)
+        print('t8')
+        checking_strikes_thread.start()
+        print('t9')
+
+        if not (strikes := ContractExistence.get_valid_strikes(current_contract, selected_expiry_dt)):
+            strikes = BXSOptionChainData.strikes[selected_type_ticker]
+
+        selected_lower_strike, selected_upper_strike = self.set_strike_comboBoxes(current_contract=current_contract, strikes=strikes)
+
+        spread = self.set_spread_text()
+
+        #Notional
+        amount = None
+        try:
+            amount = int(self.tab_registry['line_amount'].text())
+        except ValueError:
+            pass
+
+        if all([amount, multiplier, self, selected_upper_strike, selected_upper_strike]):
+            notional = spread * multiplier * amount
+            self.tab_registry['lineEdit_notional'].setText(f'{notional:,.0f}')
 
         for widget, block in zip(input_widgets, tmp_blocked_events):
             widget.blockSignals(block)
-
         print('IDM ended.')
+
+    def set_strike_comboBoxes(self, current_contract: ibContract, strikes: list[float] = None) -> tuple[float, float] | tuple[None, None]:
+
+        _lock = Lock()
+        print('Set strike comboboxes')
+        if strikes is None:
+            selected_expiry = self.tab_registry['comboBox_expiry'].currentText()
+            selected_expiry_dt = datetime.strptime(selected_expiry, '%d%b%y')
+            strikes = ContractExistence.get_valid_strikes(current_contract, selected_expiry_dt)
+        print('Before Lock')
+        with _lock:
+            print('in Lock')
+            upper_strikes = list(filter(lambda x: x >= IndexPrice.get_price(current_contract), strikes))
+            upper_strikes = sorted([str(x) for x in upper_strikes], key=lambda x: float(x), reverse=True)
+            lower_strikes = list(filter(lambda x: x <= IndexPrice.get_price(current_contract), strikes))
+            lower_strikes = sorted([str(x) for x in lower_strikes], key=lambda x: float(x), reverse=True)
+
+            selected_upper_strike = self.tab_registry['comboBox_upper_strike'].currentText()
+            self.tab_registry['comboBox_upper_strike'].clear()
+            self.tab_registry['comboBox_upper_strike'].addItems(upper_strikes)
+            if (selection := self.tab_registry['comboBox_upper_strike'].findText(selected_upper_strike)) != -1:
+                self.tab_registry['comboBox_upper_strike'].setCurrentIndex(selection)
+            else:
+                count = self.tab_registry['comboBox_upper_strike'].count()
+                self.tab_registry['comboBox_upper_strike'].setCurrentIndex(count - 1)
+                selected_upper_strike = self.tab_registry['comboBox_upper_strike'].currentText()
+
+            selected_lower_strike = self.tab_registry['comboBox_lower_strike'].currentText()
+            self.tab_registry['comboBox_lower_strike'].clear()
+            self.tab_registry['comboBox_lower_strike'].addItems(lower_strikes)
+            if (selection := self.tab_registry['comboBox_lower_strike'].findText(selected_lower_strike)) != -1:
+                self.tab_registry['comboBox_lower_strike'].setCurrentIndex(selection)
+            else:
+                self.tab_registry['comboBox_lower_strike'].setCurrentIndex(0)
+                selected_lower_strike = self.tab_registry['comboBox_lower_strike'].currentText()
+
+            print('After Lock')
+            try:
+                return float(selected_lower_strike), float(selected_upper_strike)
+            except ValueError:
+                return None, None
+
+    def set_spread_text(self) -> float:
+        try:
+            selected_lower_strike = float(self.tab_registry['comboBox_lower_strike'].currentText())
+            selected_upper_strike = float(self.tab_registry['comboBox_upper_strike'].currentText())
+            spread = selected_upper_strike - selected_lower_strike
+            spread_text = f'Spread: {selected_upper_strike - selected_lower_strike:,.0f}'
+        except ValueError:
+            spread = 0
+            spread_text = f'Spread: --- '
+
+        self.tab_registry['label_spread'].setText(spread_text)
+
+        return spread
+
+    def handle_strike_change(self):
+        self.set_spread_text()
+        pass
 
     def handle_widgets(self):
         self.set_currency_options()
@@ -186,7 +299,9 @@ class BoxSpread:
         # opacity_effect.setOpacity(transparency)
         # widget.setGraphicsEffect(opacity_effect)
 
-
+    def bxs_resize_event(self, new_size: int = None):
+        #TODO
+        ...
 
 class BoxSpreadType(StrEnum):
     LEND = 'LEND'

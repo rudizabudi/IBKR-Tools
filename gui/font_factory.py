@@ -22,30 +22,37 @@ def font_factory(core=None):
                     (wr['general']['btn_bwd'], 8),
                     (wr['general']['btn_box_spread'], 16),
 
+                    (wr['beta_weighted_deltas']['list_selection'], 18),
+                    (wr['beta_weighted_deltas']['table_greeks'], 12),
+
                     (wr['box_spread']['btn_type'], 14),
                     (wr['box_spread']['label_currency'], 14),
                     (wr['box_spread']['comboBox_currency'], 14),
                     (wr['box_spread']['comboBox_index'], 14),
                     (wr['box_spread']['label_index'], 14),
-                    (wr['box_spread']['comboBox_expiry'], 14),
+                    (wr['box_spread']['label_type'], 14),
+                    (wr['box_spread']['comboBox_type'], 14),
                     (wr['box_spread']['label_expiry'], 14),
+                    (wr['box_spread']['comboBox_expiry'], 14),
                     (wr['box_spread']['label_higher_rate'], 10),
                     (wr['box_spread']['label_lower_rate'], 10),
                     (wr['box_spread']['label_benchmark_rate'], 10),
                     (wr['box_spread']['label_selected_rate'], 12),
                     (wr['box_spread']['label_upper_strike'], 14),
-                    (wr['box_spread']['line_upper_strike'], 14),
+                    (wr['box_spread']['comboBox_upper_strike'], 14),
                     (wr['box_spread']['label_lower_strike'], 14),
-                    (wr['box_spread']['line_lower_strike'], 14),
+                    (wr['box_spread']['comboBox_lower_strike'], 14),
                     (wr['box_spread']['label_spread'], 14),
                     (wr['box_spread']['label_amount'], 14),
                     (wr['box_spread']['line_amount'], 14),
+                    (wr['box_spread']['label_selected_rate'], 14),
+                    (wr['box_spread']['label_underlying_price'], 14),
+
+
+                    (wr['box_spread']['label_multiplier'], 14),
+                    (wr['box_spread']['label_initial'], 14),
                     (wr['box_spread']['label_nominal'], 14),
-                    (wr['box_spread']['label_selected_rate'], 14),
-                    (wr['box_spread']['label_selected_rate'], 14),
-                    (wr['box_spread']['label_price'], 14),
-                    (wr['box_spread']['label_type'], 14),
-                    (wr['box_spread']['comboBox_type'], 14)
+
     ]
 
     for obj, size in font_objects:
