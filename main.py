@@ -61,6 +61,7 @@ if __name__ == "__main__":
 
 """
 TODO: Make reqIDs and req_hashtable thread-safe
+TODO: Rewrite backend while loop -> thread waits
 """
 
 

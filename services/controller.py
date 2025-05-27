@@ -4,7 +4,7 @@ from time import sleep
 from core import CoreDistributor
 from services.tws_api import TWSConDistributor
 from gui.tabs.tabs import Tabs
-from services.beta_weighted_deltas.beta_weighted_deltas import calculate_beta, get_portfolio_positions, build_position_instances, generate_header_lines, update_selection_list, \
+from services.beta_weighted_deltas.beta_weighted_deltas import calculate_beta, get_portfolio_positions, build_positions, generate_header_lines, build_selection_list, \
     request_position_greeks, generate_table_strings, filter_positions
 from services.beta_weighted_deltas.formatter import TableContentGenerator
 from services.box_spread.request_expiries import BXSOptionChainData, BXSIndexContracts, request_index_expiries
@@ -38,26 +38,26 @@ class Backend:
         while True:
             match self.core.active_tab:
                 case Tabs.BWD:
-                    get_portfolio_positions(core=self.core, con=self.tws_con)
-
-                    positions = build_position_instances(core=self.core, old_positions=positions)
-
-                    positions = filter_positions(positions=positions)  # TODO: Add support for further types
-
-                    positions_str_sorted = update_selection_list(core=self.core, positions=positions)
-
+                    print(f'Controller 0')
+                    get_portfolio_positions()
+                    print(f'Controller 1')
+                    positions = build_positions()
+                    print(f'Controller 2')
+                    print(f'Controller 3')
+                    positions_str_sorted = build_selection_list(positions=positions)
+                    print(f'Controller 4')
                     calculate_beta(core=self.core, positions=positions, con=self.tws_con)
-
+                    print(f'Controller 5')
                     pos_headers = generate_header_lines(core=self.core, positions_str_sorted=positions_str_sorted)
-
+                    print(f'Controller 6')
                     request_position_greeks(core=self.core, con=self.tws_con, positions=positions)
-
+                    print(f'Controller 7')
                     tcg = TableContentGenerator()  # Dataclass to store table content strings
-
+                    print(f'Controller 8')
                     generate_table_strings(tcg=tcg, pos_headers=pos_headers, positions=positions)
-
+                    print(f'Controller 9')
                     self.core.tab_instances['beta_weighted_deltas'].change_table_content()
-
+                    print(f'Controller 10')
                     sleep(self.core.controller_loop_interval)
 
                 case Tabs.BXS:

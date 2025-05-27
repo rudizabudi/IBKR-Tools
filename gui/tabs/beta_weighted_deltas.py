@@ -6,6 +6,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QTableWidgetItem, QHeaderView, QSizePolicy, QAbstractItemView
 
 from core import Core, CoreDistributor
+from services.beta_weighted_deltas.beta_weighted_deltas import UpdateSelectionList
 
 type CoreObj = 'CoreObj'
 type QtObj = 'QtObj'
@@ -21,6 +22,8 @@ class BetaWeightedDeltas:
 
         self.symbol_list: list = ['Loading...']
 
+        self.tab_trigger = {'selection_list': UpdateSelectionList()}
+
         self.tab_registry = self.core.widget_registry['beta_weighted_deltas']
 
         self.handle_widgets()
@@ -29,9 +32,6 @@ class BetaWeightedDeltas:
 
     def register_events(self):
         self.tab_registry['list_selection'].currentItemChanged.connect(lambda: self.change_table_content())
-
-    def tab_trigger(self):
-        self.tab_registry['table_greeks'].clearContents()
 
     def bwd_resize_event(self, new_size: int = None):
         bwd_frame = self.tab_registry['frame']
@@ -80,7 +80,7 @@ class BetaWeightedDeltas:
             selection_list.setMinimumHeight(500)
             selection_list.resize(200, 1245)
 
-        change_selection_list()
+        #change_selection_list()
 
     def change_table_content(self):
         # TODO: Add sorting via 1 or 2 selection fields: sort by and ASC/DESC(?)
