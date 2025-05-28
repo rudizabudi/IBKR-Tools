@@ -50,7 +50,7 @@ class BoxSpread:
     def tester(self):
         print('Signal received')
 
-    def first_show(self):
+    def init_activity(self):
         if not self.started_up:
             self.toggle_comboBox(self.tab_registry['comboBox_currency'])
             self.started_up = True
