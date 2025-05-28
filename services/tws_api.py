@@ -39,8 +39,8 @@ class TWSCon(EWrapper, EClient):
         if errorCode not in (200,):
             tprint(f'{reqId}, {errorCode}, {errorString}')
 
-        if reqId in ReqId.reqId_hashmap.keys():
-            ReqId.reqId_hashmap[reqId](error=True)
+        # if reqId in ReqId.reqId_hashmap.keys():
+        #     ReqId.reqId_hashmap[reqId](error=True)
 
     def contractDetails(self, reqId: int, contractDetails):
         #print(f'ContractDetails Callback  {contractDetails.__dict__=}')
