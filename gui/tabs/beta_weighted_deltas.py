@@ -36,6 +36,28 @@ class BetaWeightedDeltas:
         t = Thread(target=self.core.backend.beta_weighted_deltas, daemon=True)
         t.start()
 
+    def set_column_ratios(self):
+        bwd_table_widget = self.tab_registry['table_greeks']
+
+        bwd_table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        bwd_table_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        bwd_table_widget.setSelectionMode(QAbstractItemView.NoSelection)
+        bwd_table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
+
+        column_ratios = {0: 3,
+                         1: 7,
+                         2: 2,
+                         3: 3,
+                         4: 4,
+                         5: 7,
+                         6: 4,
+                         7: 7,
+                         8: 5}
+
+        for k, v in column_ratios.items():
+            width = int(round((bwd_table_widget.width() / sum(column_ratios.values())) * v * .96, 0))
+            bwd_table_widget.setColumnWidth(k, width)
+
     def bwd_resize_event(self, new_size: int = None):
         bwd_frame = self.tab_registry['frame']
         bwd_frame.setGeometry(bwd_frame.geometry().x(), bwd_frame.geometry().y(), new_size.width() - self.core.widget_registry['misc']['leftMenuBg'].width(), new_size.height() - self.core.widget_registry['misc']['contentTopBg'].height())
