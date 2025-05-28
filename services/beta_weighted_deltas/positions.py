@@ -84,6 +84,11 @@ class Position:
     def get_secType(self) -> str:
         return self.contract.secType
 
+    def get_right(self) -> str:
+        if self.contract.secType not in ('OPT', 'FOP'):
+            raise Exception(f'Right only available for contract instances of secType OPT. Requested {self.contract.symbol} of type {self.contract.secType}.')
+        return self.contract.right
+
     def get_symbol(self) -> str:
         return self.symbol
 
