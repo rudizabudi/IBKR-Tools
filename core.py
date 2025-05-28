@@ -68,15 +68,12 @@ class Core:
     @classmethod
     def create_var_space(cls):
         #TODO: Move as much as possible away from globalish space
-        from services.backend import Backend
-        cls.backend = Backend(cls)
 
         cls.threading_events: defaultdict[str, threading.Event] = defaultdict()
 
         cls.update_intervals: dict[str, int] = {'beta_weighted_deltas': 60}  # in secs
 
         cls.account_list: list[str] = []
-
         cls.active_tab: Tabs = Tabs.HOME
 
         cls.raw_positions: dict[str, dict[str, any]] = {}

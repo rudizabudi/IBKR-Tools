@@ -12,6 +12,7 @@ from gui.tabs.beta_weighted_deltas import BetaWeightedDeltas
 from gui.tabs.box_spread import BoxSpread
 from gui.tabs.tabs import Tabs
 from gui.font_factory import font_factory
+from services.backend import Backend
 
 os.environ["QT_FONT_DPI"] = "96"
 
@@ -23,6 +24,10 @@ class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         self.core: Core = CoreDistributor.get_core()
+
+        self.core.backend = Backend()
+        self.core.backend.to_cls(self.core)
+
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
@@ -50,7 +55,6 @@ class MainWindow(QMainWindow):
         self.ui.stackedWidget.setCurrentWidget(self.core.tab_instances['home'])
 
         self.show()
-        self.set_active_tab(Tabs.HOME)
 
     # Shared button registry
     def register_events(self):
@@ -117,6 +121,7 @@ class MainWindow(QMainWindow):
                 stacked_widget.setCurrentWidget(self.ui.home)
                 UIFunctions.resetStyle(self, btn_name)
                 btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
+                print(Tabs.HOME, 3)
                 self.set_active_tab(Tabs.HOME)
 
             # BWD widget tab
@@ -139,7 +144,8 @@ class MainWindow(QMainWindow):
 
     def set_active_tab(self, tab: Tabs):
         self.core.active_tab = tab
-
+        print(id(self.core))
+        print(f'Setting active tab: {tab}')
         match tab:
             case Tabs.BWD:
                 self.core.tab_instances['beta_weighted_deltas'].init_activity()

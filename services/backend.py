@@ -6,8 +6,6 @@ from services.beta_weighted_deltas.beta_weighted_deltas import get_stk_beta_pric
 
 
 class Backend:
-    def __init__(self, core):
-        self.to_cls(core)
 
     @classmethod
     def to_cls(cls, core):
@@ -50,9 +48,13 @@ class Backend:
         cls.core.threading_events['bwd_list_updating'].wait()
 
         cls.core.tab_instances['beta_weighted_deltas'].tab_trigger['table_greeks'].fire()
-        if cls.core.active_tab == Tabs.BXS:
+        print(id(cls.core))
+        print(f'Controller 10', cls.core.active_tab)
+        if cls.core.active_tab == Tabs.BWD:
+            print(f'Controller 11')
             thread = Timer(cls.core.update_intervals['beta_weighted_deltas'], cls.beta_weighted_deltas)
             thread.daemon = True
+            print('Starting timed loop for beta weighted deltas')
             thread.start()
 
     #     # TODO: Active tab Enum in core to define update loop by active tab
@@ -61,8 +63,6 @@ class Backend:
     #         ...  # TODO: ACCOUNT_ID selection popup
 
 
-def get_backend():
-    return Backend()
 
 
 
