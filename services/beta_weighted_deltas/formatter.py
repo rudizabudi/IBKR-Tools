@@ -87,13 +87,13 @@ class TableContentGenerator:
 
                 sum_theta.append(position.get_greeks()['theta'] * position.get_qty() * 100)
                 self.table_contents[header['name']][-1][6] = f'{position.get_greeks()['theta'] * position.get_qty() * 100:.2f}'
-
-                if (' Call ' in position.generate_name() and position.get_qty() > 0) or (' Put ' in position.generate_name() and position.get_qty() < 0):
+                print(1)
+                if (position.get_right() == 'C' and position.get_qty() > 0) or (position.get_right() == 'P' and position.get_qty() < 0):
                     l_gamma.append(position.get_greeks()['gamma'] * position.get_qty() * 100)
-                elif (' Call ' in position.generate_name() and position.get_qty() < 0) or (' Put ' in position.generate_name() and position.get_qty() > 0):
+                elif (position.get_right() == 'C' and position.get_qty() < 0) or (position.get_right() == 'P' and position.get_qty() > 0):
                     s_gamma.append(position.get_greeks()['gamma'] * position.get_qty() * 100)
                 self.table_contents[header['name']][-1][7] = f'{position.get_greeks()['gamma'] * position.get_qty() * 100:.2f}'
-
+                print(2)
                 not_pos.append(delta * underlying_price)
                 self.table_contents[header['name']][-1][8] = f'{delta * underlying_price:,.0f}'
 
