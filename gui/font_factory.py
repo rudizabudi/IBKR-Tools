@@ -21,6 +21,7 @@ def font_factory(core=None):
                     (wr['general']['btn_home'], 8),
                     (wr['general']['btn_bwd'], 8),
                     (wr['general']['btn_box_spread'], 16),
+                    (wr['general']['label_header'], 18),
 
                     (wr['beta_weighted_deltas']['list_selection'], 18),
                     (wr['beta_weighted_deltas']['table_greeks'], 12),

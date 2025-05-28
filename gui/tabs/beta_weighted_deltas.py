@@ -103,13 +103,14 @@ class BetaWeightedDeltas:
                     y = ''
 
                 item = QTableWidgetItem(str(y))
-                if i in [0] and selected_underlying not in ['Overview', 'Portfolio']:
-                    item.setFont(QFont('', 8, QFont.Bold))
-                if j in [8]:
+                #if i in (0,) and selected_underlying not in ['Overview', 'Portfolio']:
+
+                if j in (8,):
                     item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-                elif j in [1, 2, 3, 4, 5, 6, 7]:
+                elif j in (1, 2, 3, 4, 5, 6, 7):
                     item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
 
+                item.setFont(QFont(self.core.project_font, 12))
                 bwd_table.setItem(i, j, item)
 
         headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', 'γ Gamma (L|S)', 'Notional position']
