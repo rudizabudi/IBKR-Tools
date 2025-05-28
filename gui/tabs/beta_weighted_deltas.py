@@ -30,8 +30,6 @@ class BetaWeightedDeltas:
         self.tab_trigger['table_greeks'].trigger_table_update.connect(self.change_table_content)
 
     def init_activity(self):
-        print('BWD init act')
-        print(self.core.backend.beta_weighted_deltas)
         self.refresh_selection_list(['Loading...'])
         t = Thread(target=self.core.backend.beta_weighted_deltas, daemon=True)
         t.start()
@@ -44,12 +42,12 @@ class BetaWeightedDeltas:
         bwd_table_widget.setSelectionMode(QAbstractItemView.NoSelection)
         bwd_table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
 
-        column_ratios = {0: 3,
+        column_ratios = {0: 2.5,
                          1: 7,
-                         2: 2,
+                         2: 3,
                          3: 3,
                          4: 4,
-                         5: 7,
+                         5: 6,
                          6: 4,
                          7: 7,
                          8: 5}
@@ -59,32 +57,17 @@ class BetaWeightedDeltas:
             bwd_table_widget.setColumnWidth(k, width)
 
     def bwd_resize_event(self, new_size: int = None):
-        bwd_frame = self.tab_registry['frame']
-        bwd_frame.setGeometry(bwd_frame.geometry().x(), bwd_frame.geometry().y(), new_size.width() - self.core.widget_registry['misc']['leftMenuBg'].width(), new_size.height() - self.core.widget_registry['misc']['contentTopBg'].height())
 
-        headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', ' γ Gamma (L|S)', 'Notional position']
+        bwd_frame = self.tab_registry['frame']
+        bwd_frame.setGeometry(bwd_frame.geometry().x(), bwd_frame.geometry().y(), new_size.width() - self.core.widget_registry['misc']['leftMenuBg'].width() - 15, new_size.height() - self.core.widget_registry['misc']['contentTopBg'].height())
+
+        #headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', ' γ Gamma (L|S)', 'Notional position']
 
         bwd_table_widget = self.tab_registry['table_greeks']
-        bwd_table_widget.setHorizontalHeaderLabels(headers)
+        #bwd_table_widget.setHorizontalHeaderLabels(headers)
 
-        bwd_table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        bwd_table_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        bwd_table_widget.setSelectionMode(QAbstractItemView.NoSelection)
-        bwd_table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
 
-        column_ratios = {0: 3,
-                         1: 7,
-                         2: 3,
-                         3: 3,
-                         4: 4,
-                         5: 7,
-                         6: 4,
-                         7: 6,
-                         8: 5}
-
-        for k, v in column_ratios.items():
-            width = int(round((bwd_table_widget.width() / sum(column_ratios.values())) * v * .96, 0))
-            bwd_table_widget.setColumnWidth(k, width)
+        self.set_column_ratios()
 
         bwd_table_widget.horizontalHeader().setFont(QFont(self.core.project_font, 9))
 
@@ -138,6 +121,7 @@ class BetaWeightedDeltas:
         headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', 'γ Gamma (L|S)', 'Notional position']
         bwd_table.setHorizontalHeaderLabels(headers)
         bwd_table.horizontalHeader().setFont(QFont(self.core.project_font, 9))
+        self.set_column_ratios()
 
     def refresh_selection_list(self, symbol_list: list[str]):
         input_widgets = (self.tab_registry['list_selection'], self.tab_registry['table_greeks'])
