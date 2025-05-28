@@ -168,7 +168,7 @@ class MainWindow(QMainWindow):
         super().resizeEvent(event)
 
         match self.core.active_tab:
-            case 'beta_weighted_deltas':
+            case Tabs.BWD:
                 self.core.tab_instances['beta_weighted_deltas'].bwd_resize_event(new_size)
 
 
