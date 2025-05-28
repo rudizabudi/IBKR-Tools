@@ -5,7 +5,7 @@ from ibapi.client import EClient
 from ibapi.contract import Contract
 from ibapi.wrapper import EWrapper
 
-from core import CoreDistributor, ReqId, tprint, RequestState
+from core import CoreDistributor, ReqId, RequestState, tprint
 
 type Core = 'Core'
 
@@ -61,7 +61,9 @@ class TWSCon(EWrapper, EClient):
     def tickOptionComputation(self, reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice):
         super().tickOptionComputation(reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice)
         #print('Greeks received')
-        if tickType == 13 and delta is not None:
+
+        bwd_greek_request = isinstance(self.core.threading_events.get('bwd_reqGreeks', None), Event) and not self.core.threading_events['bwd_reqGreeks'].is_set()
+        if tickType == 13 and delta is not None and bwd_greek_request:
             data = {
                 'delta': delta,
                 'gamma': gamma,
@@ -72,6 +74,7 @@ class TWSCon(EWrapper, EClient):
                 'undPrice': undPrice
             }
             ReqId.reqId_hashmap[reqId](data)
+            self.core.threading_events['bwd_reqGreeks'].set()
 
     def updatePortfolio(self, contract: Contract, position: float, marketPrice: float, marketValue: float, averageCost: float, unrealizedPNL: float, realizedPNL: float, accountName: str):
         tprint(f'updatePortfolio: {contract.symbol}, {position}, {marketPrice}, {marketValue}, {averageCost}, {unrealizedPNL}, {realizedPNL}, {accountName}')
@@ -88,7 +91,7 @@ class TWSCon(EWrapper, EClient):
                     'lastTradeDateOrContractMonth': contract.lastTradeDateOrContractMonth,
                     'conId': contract.conId}
 
-        self.core.bwd_raw_positions[contract['conId']] = {
+        self.core.raw_positions[contract['conId']] = {
             'contract': contract,
             'position': position,
             'marketPrice': marketPrice,
@@ -106,7 +109,9 @@ class TWSCon(EWrapper, EClient):
 
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         super().historicalDataEnd(reqId, start, end)
-        self.request_end['historicalData'] = RequestState.RECEIVED
+        if isinstance(self.core.threading_events['bwd_reqHistoricalData'], Event) and not self.core.threading_events['bwd_reqHistoricalData'].is_set():
+            self.core.threading_events['bwd_reqHistoricalData'].set()
+
 
     def accountDownloadEnd(self, accountName: str):
         super().accountDownloadEnd(accountName)

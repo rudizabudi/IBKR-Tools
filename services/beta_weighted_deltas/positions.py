@@ -96,10 +96,15 @@ class Position:
         self.greeks = {k: v for k, v in greeks.items()}
 
     def get_price_data(self) -> dict[str, dict[str, float]]:
+
         return self.price_data
 
     def set_price_data(self, prices: dict[str, dict[str, float]]):
-        self.price_data.update(prices)
+        date = datetime.strptime(prices['date'], '%Y%m%d')
+        self.price_data[date] = { 'open': prices['open'],
+                                  'high': prices['high'],
+                                  'low': prices['low'],
+                                  'close': prices['close']}
 
     def set_historical_data_end(self, flag: bool = False, **kwargs):
         self.historical_data_end = flag

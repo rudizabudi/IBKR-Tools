@@ -1,15 +1,10 @@
-from datetime import datetime
-from time import sleep
-
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QTableWidgetItem, QHeaderView, QSizePolicy, QAbstractItemView
+from threading import Thread, Event
 
 from core import Core, CoreDistributor
-from services.beta_weighted_deltas.beta_weighted_deltas import UpdateSelectionList
-
-type CoreObj = 'CoreObj'
-type QtObj = 'QtObj'
+from services.beta_weighted_deltas.beta_weighted_deltas import UpdateSelectionList, UpdateTableGreeks
 
 
 class BetaWeightedDeltas:
@@ -20,9 +15,8 @@ class BetaWeightedDeltas:
 
         self.previous_selection: None | str = None
 
-        self.symbol_list: list = ['Loading...']
-
-        self.tab_trigger = {'selection_list': UpdateSelectionList()}
+        self.tab_trigger = {'selection_list': UpdateSelectionList(),
+                            'table_greeks': UpdateTableGreeks()}
 
         self.tab_registry = self.core.widget_registry['beta_weighted_deltas']
 
@@ -32,6 +26,15 @@ class BetaWeightedDeltas:
 
     def register_events(self):
         self.tab_registry['list_selection'].currentItemChanged.connect(lambda: self.change_table_content())
+        self.tab_trigger['selection_list'].trigger_selection_list_update.connect(self.refresh_selection_list)
+        self.tab_trigger['table_greeks'].trigger_table_update.connect(self.change_table_content)
+
+    def init_activity(self):
+        print('BWD init act')
+        print(self.core.backend.beta_weighted_deltas)
+        self.refresh_selection_list(['Loading...'])
+        t = Thread(target=self.core.backend.beta_weighted_deltas, daemon=True)
+        t.start()
 
     def bwd_resize_event(self, new_size: int = None):
         bwd_frame = self.tab_registry['frame']
@@ -86,74 +89,65 @@ class BetaWeightedDeltas:
         # TODO: Add sorting via 1 or 2 selection fields: sort by and ASC/DESC(?)
         # Alternative: Sort via column header click
 
-        selection_list = self.tab_registry['list_selection']
+        selected_underlying = self.tab_registry['list_selection'].currentItem().text()
+
         bwd_table = self.tab_registry['table_greeks']
-        if selection_list.currentItem():
-            bwd_table.clear()
+        bwd_table.clear()
 
-            selection = selection_list.currentItem().text()
-            #print(f'Selection from bwd_table check: {selection}')
+        if selected_underlying not in self.core.table_contents.keys():
+            raise RuntimeError(f'Selected underlying {selected_underlying} not found in table contents')
 
-            while selection not in self.core.table_contents.keys():
-                sleep(.01)
+        for i, x in enumerate(self.table_contents[selected_underlying]):
+            for j, y in enumerate(self.table_contents[selected_underlying][i]):  # columns
+                if not y:
+                    y = ''
 
-            for i, x in enumerate(self.table_contents[selection]):
-                for j, y in enumerate(self.table_contents[selection][i]):  # columns
-                    if not y:
-                        y = ''
+                item = QTableWidgetItem(str(y))
+                if i in [0] and selected_underlying not in ['Overview', 'Portfolio']:
+                    item.setFont(QFont('', 8, QFont.Bold))
+                if j in [8]:
+                    item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                elif j in [1, 2, 3, 4, 5, 6, 7]:
+                    item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
 
-                    item = QTableWidgetItem(str(y))
-                    if i in [0] and selection not in ['Overview', 'Portfolio']:
-                        item.setFont(QFont('', 8, QFont.Bold))
-                    if j in [8]:
-                        item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-                    elif j in [1, 2, 3, 4, 5, 6, 7]:
-                        item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+                bwd_table.setItem(i, j, item)
 
-                    bwd_table.setItem(i, j, item)
+        headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', 'γ Gamma (L|S)', 'Notional position']
+        bwd_table.setHorizontalHeaderLabels(headers)
+        bwd_table.horizontalHeader().setFont(QFont(self.core.project_font, 9))
 
-            headers = ['Symbol', 'β Beta / Position', 'Qty', 'iVol', 'δ Delta', 'Beta weighted deltas', 'θ  Theta', 'γ Gamma (L|S)', 'Notional position']
-            bwd_table.setHorizontalHeaderLabels(headers)
-            bwd_table.horizontalHeader().setFont(QFont(self.core.project_font, 9))
-            self.previous_selection = selection
+    def refresh_selection_list(self, symbol_list: list[str]):
+        input_widgets = (self.tab_registry['list_selection'], self.tab_registry['table_greeks'])
+        tmp_blocked_events = [x.blockSignals(True) for x in input_widgets]
 
-    def refresh_selection_list(self, symbol_list: list):
-        selection_list = self.tab_registry['list_selection']
-        selection_list.blockSignals(True)
-
-        if selection_list.currentItem():
-            selection = selection_list.currentItem().text()
+        current_item_obj = self.tab_registry['list_selection'].currentItem()
+        if current_item_obj:
+            selected_underlying_text = current_item_obj.text()
         else:
-            selection = None
+            selected_underlying_text = ''
 
-        selection_list.clear()
-        selection_list.addItems(symbol_list)
+        self.tab_registry['list_selection'].clear()
+        self.tab_registry['list_selection'].addItems(symbol_list)
 
-        for i in range(selection_list.count()):
-            selection_list.item(i).setFont(QFont(self.core.project_font, 16))
+        found_previous_selection = False
+        for i in range(self.tab_registry['list_selection'].count()):
+            item = self.tab_registry['list_selection'].item(i)
+            if item.text() == selected_underlying_text:
+                self.tab_registry['list_selection'].setCurrentItem(item)
+                found_previous_selection = True
+                break
 
-        # Manage re-selection or default selection
-        if selection in symbol_list:
-            while not selection_list.currentItem() or selection_list.currentItem().text() != selection:
-                try:
-                    index = symbol_list.index(selection)
-                    selection_list.setCurrentRow(index)  # Set intended selection
-                    sleep(.1)
-                except AttributeError:
-                    continue
-        else:
-            selection_list.setCurrentRow(0)  # Default selection
+        if not found_previous_selection:
+            if self.tab_registry['list_selection'].count() > 0:
+                self.tab_registry['list_selection'].setCurrentRow(0)
 
-        selection_list.blockSignals(False)  # Re-enable signals
+        for widget, block in zip(input_widgets, tmp_blocked_events):
+            widget.blockSignals(block)
 
-    # def selection_list_change(self):
-    #     try:
-    #         self.change_table_content()
-    #     except AttributeError:
-    #         pass
-    #
-    # def set_symbol_list(self, symbol_list: list):
-    #     self.symbol_list = symbol_list
+        if isinstance(self.core.threading_events.get('bwd_list_updating'), Event) and not self.core.threading_events.get('bwd_list_updating').is_set():
+            self.core.threading_events['bwd_list_updating'].set()
+        # for i in range(selection_list.count()):
+        #     selection_list.item(i).setFont(QFont(self.core.project_font, 16))
 
 
 

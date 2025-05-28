@@ -102,9 +102,6 @@ class MainWindow(QMainWindow):
         self.core.widget_registry['general']['btn_home'].setStyleSheet(UIFunctions.selectMenu(self.core.widget_registry['general']['btn_home'].styleSheet()))
 
         self.core.widget_registry['general']['label_header'].setText('IBKR Tools')
-        #self.core.widget_registry['general']['rightTopLabel'].setText('🔴 Not connected.')
-
-        #self.core.widget_registry['misc']['rightTopLabel'].setText(f'🟢  Last update:  {datetime.now().strftime('%H:%M')}')
 
         self.ui.bwd_tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
@@ -136,13 +133,18 @@ class MainWindow(QMainWindow):
                 UIFunctions.resetStyle(self, btn_name)
                 btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
                 self.set_active_tab(Tabs.BXS)
-                self.core.tab_instances['box_spread'].first_show()
 
             case _:
                 print(f'Unregistered button clicked: {btn_name}')
 
     def set_active_tab(self, tab: Tabs):
         self.core.active_tab = tab
+
+        match tab:
+            case Tabs.BWD:
+                self.core.tab_instances['beta_weighted_deltas'].init_activity()
+            case Tabs.BXS:
+                self.core.tab_instances['box_spread'].init_activity()
 
     def mousePressEvent(self, event):
         # SET DRAG POS WINDOW

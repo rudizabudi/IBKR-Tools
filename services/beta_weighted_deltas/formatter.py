@@ -1,6 +1,7 @@
 from statistics import mean
 
 from core import Core, CoreDistributor
+from services.beta_weighted_deltas.beta_weighted_deltas import StockCache
 from services.beta_weighted_deltas.positions import Position
 
 
@@ -20,7 +21,7 @@ class TableContentGenerator:
 
         self.table_contents = self.core.table_contents
 
-    def generate_position_cells(self, header: dict[str: str | float], positions: list[Position]):
+    def generate_position_cells(self, header: dict[str, str | float], positions: list[Position]):
 
         def add_empty_row():
             self.table_contents[header['name']].append([])
@@ -49,17 +50,17 @@ class TableContentGenerator:
             self.table_contents[header['name']][-1][1] = underlying.generate_name()
             self.table_contents[header['name']][-1][2] = underlying.get_qty()
 
-            delta = self.table_contents[header['name']][-1][2]
-            sum_delta.append(delta)
-            self.table_contents[header['name']][-1][4] = f'{delta:,.2f}'
-            sum_bwd.append(delta * beta)
-            self.table_contents[header['name']][-1][5] = f'{delta * beta:,.2f}'
+            underlying_delta = self.table_contents[header['name']][-1][2]
+            sum_delta.append(underlying_delta)
+            self.table_contents[header['name']][-1][4] = f'{underlying_delta:,.2f}'
+            sum_bwd.append(underlying_delta * beta)
+            self.table_contents[header['name']][-1][5] = f'{underlying_delta * beta:,.2f}'
             not_pos.append(self.table_contents[header['name']][-1][2] * underlying.get_price())
             self.table_contents[header['name']][-1][8] = f'{self.table_contents[header['name']][-1][2] * underlying.get_price():,.0f}'
 
             underlying_price = underlying.get_price()
         else:
-            underlying_price = self.core.underlying_prices[header['name']]
+            underlying_price = StockCache.get_price(symbol=header['symbol'])
 
         for position in positions:
             if position != underlying or underlying is None:
@@ -75,8 +76,8 @@ class TableContentGenerator:
                 except KeyError:
                     avg_ivol.append(0)
                     self.table_contents[header['name']][-1][3] = f'{0 * 100:.0f}%'
+                    print(f'KeyError: No IVOL found for {position.generate_name()}', position.get_greeks())
 
-                    print(f'KeyError: {position.generate_name()} has no IVOL', position.get_greeks())
                 delta = position.get_greeks()['delta'] * position.get_qty() * 100
                 sum_delta.append(delta)
                 self.table_contents[header['name']][-1][4] = f'{delta:.2f}'
@@ -105,10 +106,6 @@ class TableContentGenerator:
         self.table_contents[header['name']][0][7] = f'{sum(l_gamma):.2f} | {sum(s_gamma):.2f}'
         self.table_contents[header['name']][0][8] = f'{sum(not_pos):,.0f}'
 
-        # for x in self.table_contents[header['name']]:
-        #     print(x)
-        # print(' - - - ')
-
     def calculate_total_line(self):
 
         self.total_line = [[] for _ in range(9)]
@@ -120,7 +117,7 @@ class TableContentGenerator:
             try:
                 ivol_avg.append(int(self.table_contents[header][0][3][:-1]))
             except TypeError:
-                print('IVOL Error:', self.table_contents[header][0])
+                print('IVOL Error in total line', self.table_contents[header][0])
                 pass
 
             delta_sum.append(float(self.table_contents[header][0][4]))

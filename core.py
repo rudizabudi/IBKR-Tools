@@ -6,7 +6,6 @@ import os
 import threading
 from typing import Any, Callable
 
-
 from ibapi.contract import Contract as ibContract
 from gui.tabs.tabs import Tabs
 
@@ -24,7 +23,6 @@ class Core:
     def __init__(self):
         self.load_config()
         self.create_var_space()
-
 
     @classmethod
     def load_config(cls):
@@ -56,7 +54,6 @@ class Core:
             config = config['profiles'][list(config['profiles'].keys())[selection]]
         else:
             config = config['profiles'][list(config['profiles'].keys())[0]]
-
         try:
             cls.HOST_IP = config['api_host_ip']
             cls.API_PORT = config['api_port']
@@ -68,14 +65,15 @@ class Core:
         except KeyError as e:
             raise KeyError(f'Missing key in config file: {e}')
 
-
     @classmethod
     def create_var_space(cls):
         #TODO: Move as much as possible away from globalish space
+        from services.backend import Backend
+        cls.backend = Backend(cls)
 
-        cls.threading_events: defaultdict[str, threading.Event] = {}
+        cls.threading_events: defaultdict[str, threading.Event] = defaultdict()
 
-        cls.controller_loop_interval: int = 60  # in secs
+        cls.update_intervals: dict[str, int] = {'beta_weighted_deltas': 60}  # in secs
 
         cls.account_list: list[str] = []
 
@@ -86,12 +84,12 @@ class Core:
         cls.positions: list[ContractInstance] = []
         cls.positions_str_sorted: list[str] = []
 
-        cls.pos_betas: dict[str: float] = {}
+        cls.pos_betas: dict[str, float] = {}
 
-        cls.table_contents: dict[str: list[str | float]] = {}
+        cls.table_contents: dict[str, list[str | float]] = {}
 
-        cls.item_register: dict[str: QtObj] = {}
-        cls.underlying_prices: dict[str: float] = {}
+        cls.item_register: dict[str, QtObj] = {}
+        cls.underlying_prices: dict[str, float] = {}
 
         cls.bwd_update_refresh: QTFunc = None
 
