@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import os
 import threading
-from typing import Any, Callable
+from typing import Callable
 
 from ibapi.contract import Contract as ibContract
 from gui.tabs.tabs import Tabs

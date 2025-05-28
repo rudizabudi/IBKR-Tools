@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from functools import partial, partialmethod
+from functools import partial
 from time import sleep
 import yfinance as yf
 

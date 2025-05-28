@@ -1,11 +1,9 @@
 import faulthandler
 import sys
 from threading import Thread
-from time import sleep
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
-from ibapi.contract import Contract
 
 from core import Core, CoreDistributor
 from gui.frame import MainWindow

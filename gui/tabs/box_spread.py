@@ -1,7 +1,5 @@
 from datetime import datetime
 from enum import StrEnum
-
-from PySide6.QtCore import QThread, QObject
 from ibapi.contract import Contract as ibContract
 import json
 from threading import Event as TEvent, Lock, Thread
@@ -12,9 +10,6 @@ from services.box_spread.request_prices import IndexPrice
 from services.box_spread.request_expiries import BXSOptionChainData, BXSIndexContracts, request_index_expiries
 from services.box_spread.check_existence import check_strikes, ContractExistence, UpdateGuiStrikes
 from services.contracts import create_index_contract
-
-type CoreObj = 'CoreObj'
-type QtObj = 'QtObj'
 
 
 class BoxSpread:

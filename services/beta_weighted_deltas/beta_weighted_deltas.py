@@ -1,6 +1,4 @@
-from collections import defaultdict
 from datetime import datetime
-from time import sleep
 from ibapi.contract import Contract as ibContract
 
 from pandas import DataFrame as df
@@ -9,10 +7,10 @@ from threading import Event
 
 from core import CoreDistributor, ReqId
 from services.beta_weighted_deltas.cache import StockCache
-from services.beta_weighted_deltas.formatter import generate_selection_list, TableContentGenerator
+from services.beta_weighted_deltas.formatter import TableContentGenerator
 from services.beta_weighted_deltas.header import Header
 from services.beta_weighted_deltas.positions import Position
-from services.tws_api import  TWSConDistributor
+from services.tws_api import TWSConDistributor
 
 
 def get_portfolio_positions():
@@ -33,7 +31,7 @@ def build_positions() -> list[Position]:
     core = CoreDistributor.get_core()
 
     positions = []
-    for k in core.raw_positions.keys(): #TODO: Move raw positions to dedicated class
+    for k in core.raw_positions.keys():  # TODO: Move raw positions to dedicated class
         if filter_raw_position(position=core.raw_positions[k]):
             pos = Position(core=core, **core.raw_positions[k])
             positions.append(pos)

@@ -1,17 +1,14 @@
-from datetime import datetime
 import os
 
 from PySide6.QtWidgets import QMainWindow, QHeaderView
 
-
 from core import Core, CoreDistributor
 from gui.app_settings import Settings
-#from gui.modules.ui_main import Ui_MainWindow
-from gui.ui_main import Ui_MainWindow
+from gui.font_factory import font_factory
 from gui.tabs.beta_weighted_deltas import BetaWeightedDeltas
 from gui.tabs.box_spread import BoxSpread
 from gui.tabs.tabs import Tabs
-from gui.font_factory import font_factory
+from gui.ui_main import Ui_MainWindow
 from services.backend import Backend
 
 os.environ["QT_FONT_DPI"] = "96"
