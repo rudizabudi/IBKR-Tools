@@ -1,5 +1,5 @@
 from threading import Timer, Event
-
+from time import perf_counter, perf_counter_ns
 from gui.tabs.tabs import Tabs
 from services.beta_weighted_deltas.beta_weighted_deltas import get_stk_beta_price, get_portfolio_positions, build_positions, generate_header_lines, build_selection_list, \
     request_position_greeks, generate_table_strings
@@ -21,17 +21,26 @@ class Backend:
 
     @classmethod
     def beta_weighted_deltas(cls):
+        t0 = perf_counter_ns()
         get_portfolio_positions()
+        t1 = perf_counter_ns()
+        print(f'Requesting positions took {(t1 - t0) / 1_000_000_000:.2f} sec')
         print(f'Controller 1')
         positions = build_positions()
         print(f'Controller 3')
         positions_str_sorted = build_selection_list(positions=positions)
         print(f'Controller 4')
+        t2 = perf_counter_ns()
         get_stk_beta_price(positions=positions)
+        t3 = perf_counter_ns()
+        print(f'Requesting betas took {(t3 - t2) / 1_000_000_000:.2f} sec')
         print(f'Controller 5')
         pos_headers = generate_header_lines(positions_str_sorted=positions_str_sorted)
         print(f'Controller 6')
+        t4 = perf_counter_ns()
         request_position_greeks(positions=positions)
+        t5 = perf_counter_ns()
+        print(f'Requesting greeks took {(t5 - t4) / 1_000_000_000:.2f} sec')
         print(f'Controller 8')
         generate_table_strings(pos_headers=pos_headers, positions=positions)
         print(f'Controller 9')

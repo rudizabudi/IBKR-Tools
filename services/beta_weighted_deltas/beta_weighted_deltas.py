@@ -33,7 +33,6 @@ def build_positions() -> list[Position]:
     core = CoreDistributor.get_core()
 
     positions = []
-
     for k in core.raw_positions.keys(): #TODO: Move raw positions to dedicated class
         if filter_raw_position(position=core.raw_positions[k]):
             pos = Position(core=core, **core.raw_positions[k])
@@ -52,7 +51,7 @@ def filter_raw_position(position: dict[str, ibContract | str | int | float]) -> 
     SUPPORTED_CURRENCIES = ('USD',)
 
     filter_qty = True
-    MINIMUM_QTY = 0  # exclusive
+    EXCLUDED_QTY = (0,)
 
     if filter_type:
         if position['contract']['secType'] not in SUPPORTED_TYPES:
@@ -63,7 +62,7 @@ def filter_raw_position(position: dict[str, ibContract | str | int | float]) -> 
             return False
 
     if filter_qty:
-        if position['position'] <= MINIMUM_QTY:
+        if position['position'] in EXCLUDED_QTY:
             return False
 
     return True
@@ -130,15 +129,18 @@ def request_position_greeks(positions: list[Position]):
 
     OPTION_TYPES = ('FOP', 'OPT')
 
+    core.threading_events['bwd_reqGreeks'] = {}
     for position in positions:
         contract = position.get_contract()
         if contract.secType in OPTION_TYPES and datetime.today().date() <= position.get_expiry(dt_object=True).date():
-            core.threading_events['bwd_reqGreeks'] = Event()
-
             reqId = ReqId.register_reqId(position.set_greeks)
+
+            core.threading_events['bwd_reqGreeks'][reqId] = Event()
+
             con.reqMktData(reqId, contract, '13', True, False, []) # TODO: Test subscription
 
-            core.threading_events['bwd_reqGreeks'].wait()
+    for reqId in core.threading_events['bwd_reqGreeks'].keys():
+        core.threading_events['bwd_reqGreeks'][reqId].wait()
 
 
 class UpdateTableGreeks(QObject):

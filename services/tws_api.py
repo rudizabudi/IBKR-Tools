@@ -62,7 +62,7 @@ class TWSCon(EWrapper, EClient):
         super().tickOptionComputation(reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice)
         #print('Greeks received')
 
-        bwd_greek_request = isinstance(self.core.threading_events.get('bwd_reqGreeks', None), Event) and not self.core.threading_events['bwd_reqGreeks'].is_set()
+        bwd_greek_request = isinstance(self.core.threading_events['bwd_reqGreeks'].get(reqId, None), Event) and not self.core.threading_events['bwd_reqGreeks'][reqId].is_set()
         if tickType == 13 and delta is not None and bwd_greek_request:
             data = {
                 'delta': delta,
@@ -74,10 +74,10 @@ class TWSCon(EWrapper, EClient):
                 'undPrice': undPrice
             }
             ReqId.reqId_hashmap[reqId](data)
-            self.core.threading_events['bwd_reqGreeks'].set()
+            self.core.threading_events['bwd_reqGreeks'][reqId].set()
 
     def updatePortfolio(self, contract: Contract, position: float, marketPrice: float, marketValue: float, averageCost: float, unrealizedPNL: float, realizedPNL: float, accountName: str):
-        tprint(f'updatePortfolio: {contract.symbol}, {position}, {marketPrice}, {marketValue}, {averageCost}, {unrealizedPNL}, {realizedPNL}, {accountName}')
+        #tprint(f'updatePortfolio: {contract.symbol}, {position}, {marketPrice}, {marketValue}, {averageCost}, {unrealizedPNL}, {realizedPNL}, {accountName}')
 
         # for x in dir(contract):
         #     tprint(f'{x}: {getattr(contract, x)}')
@@ -109,9 +109,9 @@ class TWSCon(EWrapper, EClient):
 
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         super().historicalDataEnd(reqId, start, end)
+
         if isinstance(self.core.threading_events['bwd_reqHistoricalData'], Event) and not self.core.threading_events['bwd_reqHistoricalData'].is_set():
             self.core.threading_events['bwd_reqHistoricalData'].set()
-
 
     def accountDownloadEnd(self, accountName: str):
         super().accountDownloadEnd(accountName)
