@@ -74,6 +74,7 @@ class IndexPrice:
         cls.set_price(price=data, contract=index_contract)
 
         cls.core.threading_events['bxs_contract_price_received'].set()
+        cls.core.threading_events['bxs_contract_price_received'].wait()
 
     @classmethod
     def set_price(cls, price: dict[str, str | float], contract: ibContract):
@@ -97,5 +98,6 @@ class IndexPrice:
     @classmethod
     def get_price(cls, contract: ibContract) -> float:
         return cls.last_prices[contract]['price']
+
 
 
