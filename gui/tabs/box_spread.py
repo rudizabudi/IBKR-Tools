@@ -8,6 +8,7 @@ import os
 from core import Core, CoreDistributor
 from services.box_spread.request_prices import IndexPrice
 from services.box_spread.request_expiries import BXSOptionChainData, BXSIndexContracts, request_index_expiries
+from services.box_spread.request_bxs_options import request_bxs_option_prices
 from services.box_spread.check_existence import check_strikes, ContractExistence, UpdateGuiStrikes
 from services.contracts import create_index_contract
 
@@ -36,8 +37,9 @@ class BoxSpread:
         self.tab_registry['comboBox_currency'].currentIndexChanged.connect(lambda: (print('a'), self.input_dependency_manager()))
         self.tab_registry['comboBox_index'].currentIndexChanged.connect(lambda x: (print('b', x), self.input_dependency_manager()))
         self.tab_registry['comboBox_type'].currentIndexChanged.connect(lambda: (print('c'), self.input_dependency_manager()))
-        self.tab_registry['comboBox_upper_strike'].currentIndexChanged.connect(lambda: print('d'), self.handle_strike_change())
-        self.tab_registry['comboBox_lower_strike'].currentIndexChanged.connect(lambda: print('e'), self.handle_strike_change())
+        self.tab_registry['comboBox_upper_strike'].currentIndexChanged.connect(lambda: (print('d'), self.input_dependency_manager()))
+        self.tab_registry['comboBox_lower_strike'].currentIndexChanged.connect(lambda: (print('e'), self.input_dependency_manager()))
+        self.tab_registry['line_amount'].textEdited.connect(lambda: (print('f'), self.input_dependency_manager()))
 
         self.tab_trigger['strikes'].trigger_strike_update.connect(self.tester)
         self.tab_registry['slider_rate'].sliderMoved.connect(lambda x: print(123, x))
@@ -51,7 +53,8 @@ class BoxSpread:
             self.started_up = True
 
     def input_dependency_manager(self):
-        input_widgets = (self.tab_registry['comboBox_currency'], self.tab_registry['comboBox_index'], self.tab_registry['comboBox_type'])
+        input_widgets = (self.tab_registry['comboBox_currency'], self.tab_registry['comboBox_index'], self.tab_registry['comboBox_type'],
+                         self.tab_registry['comboBox_upper_strike'], self.tab_registry['comboBox_lower_strike'])
         tmp_blocked_events = [x.blockSignals(True) for x in input_widgets]
 
         #Currency
@@ -138,7 +141,6 @@ class BoxSpread:
             print('t5')
             price_request_thread.start()
             print('t6')
-            self.core.threading_events['bxs_contract_price_received'].wait()
             price_request_thread.join()
             print('t7')
 
@@ -151,6 +153,7 @@ class BoxSpread:
         if not selected_expiry:
             return
 
+        #strikes
         selected_expiry_dt = datetime.strptime(selected_expiry, '%d%b%y')
         checking_strikes_thread = Thread(target=check_strikes, args=(current_contract, selected_expiry_dt, self), daemon=True)
         print('t8')
@@ -160,23 +163,35 @@ class BoxSpread:
         if not (strikes := ContractExistence.get_valid_strikes(current_contract, selected_expiry_dt)):
             strikes = BXSOptionChainData.strikes[selected_type_ticker]
 
-        selected_lower_strike, selected_upper_strike = self.set_strike_comboBoxes(current_contract=current_contract, strikes=strikes)
+        selected_lower_strike, selected_upper_strike = self.set_strike_comboBoxes(current_contract=current_contract,
+                                                                                  strikes=strikes)
+        if selected_lower_strike is not None and selected_upper_strike is not None:
+            request_bxs_option_prices(index_contract=current_contract,
+                                      expiry_date=selected_expiry_dt,
+                                      lower_strike=selected_lower_strike,
+                                      upper_strike=selected_upper_strike)
 
         spread = self.set_spread_text()
 
-        #Notional
+        # Redemption
         amount = None
         try:
             amount = int(self.tab_registry['line_amount'].text())
         except ValueError:
             pass
 
-        if all([amount, multiplier, self, selected_upper_strike, selected_upper_strike]):
-            notional = spread * multiplier * amount
-            self.tab_registry['lineEdit_notional'].setText(f'{notional:,.0f}')
+        if all([amount, multiplier, spread]):
+            redemption = spread * multiplier * amount
+            print([amount, multiplier, spread, redemption])
+
+            self.tab_registry['label_redemption'].setText(f'Redemption: {redemption:,.0f}')
+        else:
+            self.tab_registry['label_redemption'].setText(f'Redemption:')
+
 
         for widget, block in zip(input_widgets, tmp_blocked_events):
             widget.blockSignals(block)
+
         print('IDM ended.')
 
     def set_strike_comboBoxes(self, current_contract: ibContract, strikes: list[float] = None) -> tuple[float, float] | tuple[None, None]:
@@ -221,6 +236,7 @@ class BoxSpread:
                 return None, None
 
     def set_spread_text(self) -> float:
+        print('Sets spread text')
         try:
             selected_lower_strike = float(self.tab_registry['comboBox_lower_strike'].currentText())
             selected_upper_strike = float(self.tab_registry['comboBox_upper_strike'].currentText())
@@ -234,9 +250,9 @@ class BoxSpread:
 
         return spread
 
-    def handle_strike_change(self):
+    def strike_change(self):
+        print(123)
         self.set_spread_text()
-        pass
 
     def handle_widgets(self):
         self.set_currency_options()
