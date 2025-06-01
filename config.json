@@ -5,8 +5,14 @@
             "api_port": 7497,
             "api_client_id": 1337,
             "ibkr_account_id": "U10679XYZ",
-            "beta_benchmark": "SPY",
             "beta_period": "1 Y"
         }
+    },
+    "settings": {
+        "beta_weighted_deltas": {
+            "update_interval_secs": 60,
+            "beta_benchmark": "SPY"
         }
+    }
+}
 }
