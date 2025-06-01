@@ -6,10 +6,11 @@ from core import CoreDistributor
 
 def create_benchmark_contract() -> ibContract:
     benchmark_contract = ibContract()
-    benchmark_contract.symbol = CoreDistributor.get_core().BENCHMARK
+    benchmark_contract.symbol = CoreDistributor.get_core().settings['beta_weighted_deltas']['beta_benchmark']
     benchmark_contract.secType = 'STK'
     benchmark_contract.exchange = 'SMART'
     benchmark_contract.currency = 'USD'
+
     return benchmark_contract
 
 
