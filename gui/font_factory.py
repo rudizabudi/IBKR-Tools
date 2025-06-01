@@ -51,8 +51,8 @@ def font_factory(core=None):
 
 
                     (wr['box_spread']['label_multiplier'], 14),
-                    (wr['box_spread']['label_initial'], 14),
-                    (wr['box_spread']['label_nominal'], 14),
+                    (wr['box_spread']['label_principal'], 14),
+                    (wr['box_spread']['label_redemption'], 14),
 
     ]
 

@@ -11,7 +11,9 @@ type Core = 'Core'
 
 
 class TWSCon(EWrapper, EClient):
+
     def __init__(self):
+
         super().__init__()
         EClient.__init__(self, wrapper=self)
 
@@ -78,6 +80,7 @@ class TWSCon(EWrapper, EClient):
 
     def updatePortfolio(self, contract: Contract, position: float, marketPrice: float, marketValue: float, averageCost: float, unrealizedPNL: float, realizedPNL: float, accountName: str):
         #tprint(f'updatePortfolio: {contract.symbol}, {position}, {marketPrice}, {marketValue}, {averageCost}, {unrealizedPNL}, {realizedPNL}, {accountName}')
+        from services.beta_weighted_deltas.beta_weighted_deltas import RawPositions
 
         # for x in dir(contract):
         #     tprint(f'{x}: {getattr(contract, x)}')
@@ -91,14 +94,14 @@ class TWSCon(EWrapper, EClient):
                     'lastTradeDateOrContractMonth': contract.lastTradeDateOrContractMonth,
                     'conId': contract.conId}
 
-        self.core.raw_positions[contract['conId']] = {
+        RawPositions.set_positions({
             'contract': contract,
             'position': position,
             'marketPrice': marketPrice,
             'marketValue': marketValue,
             'averageCost': averageCost,
             'unrealizedPNL': unrealizedPNL,
-            'realizedPNL': realizedPNL}
+            'realizedPNL': realizedPNL})
 
     def historicalData(self, reqId, bar):
         #print('HistDataInc', bar)

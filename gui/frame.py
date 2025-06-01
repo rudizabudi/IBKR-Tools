@@ -52,13 +52,14 @@ class MainWindow(QMainWindow):
         self.ui.stackedWidget.setCurrentWidget(self.core.tab_instances['home'])
 
         self.show()
+        self.core.active_tab = Tabs.HOME
 
     # Shared button registry
     def register_events(self):
         # TOGGLE MENU
         self.core.widget_registry['general']['btn_toggle'].clicked.connect(lambda: UIFunctions.toggleMenu(self, True))
 
-        #Menu buttons
+        # Menu buttons
         self.core.widget_registry['general']['btn_home'].clicked.connect(self.click_handler)
         self.core.widget_registry['general']['btn_bwd'].clicked.connect(self.click_handler)
         self.core.widget_registry['general']['btn_box_spread'].clicked.connect(self.click_handler)
@@ -82,18 +83,15 @@ class MainWindow(QMainWindow):
                            'comboBox_upper_strike': self.ui.bxs_comboBox_upper_strike, 'label_lower_strike': self.ui.bxs_label_lower_strike,
                            'comboBox_lower_strike': self.ui.bxs_comboBox_lower_strike, 'label_spread': self.ui.bxs_label_spread,
                            'label_amount': self.ui.bxs_label_amount, 'line_amount': self.ui.bxs_lineEdit_amount,
-                           'label_nominal': self.ui.bxs_label_nominal, 'label_underlying_price': self.ui.bxs_label_underlying_price,
+                           'label_redemption': self.ui.bxs_label_redemption, 'label_underlying_price': self.ui.bxs_label_underlying_price,
                            'label_type': self.ui.bxs_label_type, 'comboBox_type': self.ui.bxs_comboBox_type,
-                           'label_multiplier': self.ui.bxs_label_multiplier,
-                           'label_initial': self.ui.bxs_label_initial, 'label_nominal': self.ui.bxs_label_nominal},
-            'misc': {'title_right_info': self.ui.titleRightInfo, 'leftMenuBg': self.ui.leftMenuBg, 'contentTopBg': self.ui.contentTopBg,
-                     'rightTopLabel': self.ui.titleRightInfo}
+                           'label_multiplier': self.ui.bxs_label_multiplier, 'label_principal': self.ui.bxs_label_principal},
+            'misc': {'title_right_info': self.ui.titleRightInfo, 'leftMenuBg': self.ui.leftMenuBg,
+                     'contentTopBg': self.ui.contentTopBg, 'rightTopLabel': self.ui.titleRightInfo}
         }
-        print('Widget registry initialized.')
 
     # Subpage instances
     def register_subpage_instances(self):
-        # Tab instances
         self.core.tab_instances['home'] = self.ui.home
         self.core.tab_instances['beta_weighted_deltas'] = BetaWeightedDeltas()
         self.core.tab_instances['box_spread'] = BoxSpread()
@@ -114,23 +112,22 @@ class MainWindow(QMainWindow):
         stacked_widget = self.core.widget_registry['general']['stacked_widget']
         match btn_name:
             # Home tab
-            case "btn_home":
+            case 'btn_home':
                 stacked_widget.setCurrentWidget(self.ui.home)
                 UIFunctions.resetStyle(self, btn_name)
                 btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
-                print(Tabs.HOME, 3)
+
                 self.set_active_tab(Tabs.HOME)
 
-            # BWD widget tab
-            case "btn_bwd":
+            # BWD tab
+            case 'btn_bwd':
                 stacked_widget.setCurrentWidget(self.ui.beta_weighted_deltas)
                 UIFunctions.resetStyle(self, btn_name)
                 btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
                 self.set_active_tab(Tabs.BWD)
-                #self.core.tab_instances['beta_weighted_deltas'].tab_trigger()
 
-            # Box Spread tab
-            case "btn_box_spread":
+            # BXS tab
+            case 'btn_box_spread':
                 stacked_widget.setCurrentWidget(self.ui.box_spread)
                 UIFunctions.resetStyle(self, btn_name)
                 btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
@@ -141,8 +138,7 @@ class MainWindow(QMainWindow):
 
     def set_active_tab(self, tab: Tabs):
         self.core.active_tab = tab
-        print(id(self.core))
-        print(f'Setting active tab: {tab}')
+
         match tab:
             case Tabs.BWD:
                 self.core.tab_instances['beta_weighted_deltas'].init_activity()
@@ -152,17 +148,6 @@ class MainWindow(QMainWindow):
     def mousePressEvent(self, event):
         # SET DRAG POS WINDOW
         self.dragPos = event.globalPos()
-
-        # PRINT MOUSE EVENTS
-        # if event.buttons() == Qt.LeftButton:
-        #     print('Mouse click: LEFT CLICK')
-        # if event.buttons() == Qt.RightButton:
-        #     print('Mouse click: RIGHT CLICK')
-
-    # def resizeEvent(self, event):
-    #     new_size = event.size()
-    #     print(f"Window resized: {new_size.width()} x {new_size.height()}")
-    #     super().resizeEvent(event)
 
     def resizeEvent(self, event):
         # Update Size Grips

@@ -52,11 +52,12 @@ class BXSOptionChainData:
         cls.strikes[symbol].extend(x for x in r_strikes if x not in cls.strikes[symbol])
         cls.multipliers[symbol].extend(float(x) for x in r_multiplier.split(',') if float(x) not in cls.multipliers[symbol])
 
+
 class conIdCache:
     conIDs = {}
 
     @classmethod
-    def set_conId(cls, symbol, contractDetails):
+    def set_conId(cls, symbol: str, contractDetails: dict[str, ibContract | str | int | float]):
         cls.conIDs[symbol] = contractDetails.contract.conId
 
         core = CoreDistributor.get_core()
@@ -64,10 +65,11 @@ class conIdCache:
             core.threading_events['reqConid'].set()
 
     @classmethod
-    def get_conId(cls, symbol) -> int:
+    def get_conId(cls, symbol: str) -> int | None:
         if symbol not in cls.conIDs.keys():
             return None
         return cls.conIDs[symbol]
+
 
 def request_conId(index_contract: ibContract, con: TWSCon, core) -> int:
 

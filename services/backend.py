@@ -48,17 +48,15 @@ class Backend:
         cls.core.threading_events['bwd_list_updating'].wait()
 
         cls.core.tab_instances['beta_weighted_deltas'].tab_trigger['table_greeks'].fire()
-        print(id(cls.core))
+
         print(f'Controller 10', cls.core.active_tab)
         if cls.core.active_tab == Tabs.BWD:
-            print(f'Controller 11')
-            thread = Timer(cls.core.update_intervals['beta_weighted_deltas'], cls.beta_weighted_deltas)
+            thread = Timer(cls.core.settings['beta_weighted_deltas']['update_interval_secs'], cls.beta_weighted_deltas)
             thread.daemon = True
-            print('Starting timed loop for beta weighted deltas')
+
             thread.start()
 
-    #     # TODO: Active tab Enum in core to define update loop by active tab
-    #         # Move single tab logic into folders
+
     #     if not self.check_account_id():
     #         ...  # TODO: ACCOUNT_ID selection popup
 

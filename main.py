@@ -8,7 +8,6 @@ from PySide6.QtWidgets import QApplication
 from core import Core, CoreDistributor
 from gui.frame import MainWindow
 
-#from services.tws_api import TWSConDistributor
 
 faulthandler.enable()
 
