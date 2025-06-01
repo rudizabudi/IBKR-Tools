@@ -13,12 +13,24 @@ from services.beta_weighted_deltas.positions import Position
 from services.tws_api import TWSConDistributor
 
 
+class RawPositions:
+    raw_positions: dict[str, dict[str, ibContract | str | int | float]] = {}
+
+    @classmethod
+    def set_positions(cls, raw_position: dict[str, ibContract | str | int | float]):
+        key = raw_position['contract']['conId']
+        cls.raw_positions[key] = raw_position
+
+    @classmethod
+    def get_raw_positions(cls):
+        return cls.raw_positions
+
+
 def get_portfolio_positions():
 
     core = CoreDistributor.get_core()
     con = TWSConDistributor.get_con()
 
-    core.bwd_raw_positions = {}
     core.threading_events['bwd_reqAccountUpdates'] = Event()
 
     con.reqAccountUpdates(True, core.ACCOUNT_ID)
@@ -30,10 +42,12 @@ def get_portfolio_positions():
 def build_positions() -> list[Position]:
     core = CoreDistributor.get_core()
 
+    raw_positions = RawPositions.get_raw_positions()
+
     positions = []
-    for k in core.raw_positions.keys():  # TODO: Move raw positions to dedicated class
-        if filter_raw_position(position=core.raw_positions[k]):
-            pos = Position(core=core, **core.raw_positions[k])
+    for k in raw_positions.keys():
+        if filter_raw_positions(position=raw_positions[k]):
+            pos = Position(core=core, **raw_positions[k])
             positions.append(pos)
 
     positions = list(set(positions))
@@ -41,7 +55,7 @@ def build_positions() -> list[Position]:
     return positions
 
 
-def filter_raw_position(position: dict[str, ibContract | str | int | float]) -> bool:
+def filter_raw_positions(position: dict[str, ibContract | str | int | float]) -> bool:
     filter_type = True
     SUPPORTED_TYPES = ('STK', 'OPT', 'FOP')
 
@@ -64,6 +78,7 @@ def filter_raw_position(position: dict[str, ibContract | str | int | float]) -> 
             return False
 
     return True
+
 
 class UpdateSelectionList(QObject):
     trigger_selection_list_update = Signal(list)
