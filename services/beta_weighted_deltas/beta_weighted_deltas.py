@@ -200,7 +200,7 @@ def request_historical_data(position: Position):
                           endDateTime=datetime.today().strftime("%Y%m%d-%H:%M:%S"),
                           durationStr='1 Y',
                           barSizeSetting='1 day',
-                          whatToShow="Bid_Ask",
+                          whatToShow='Bid_Ask',
                           useRTH=1,
                           formatDate=1,
                           keepUpToDate=False,
