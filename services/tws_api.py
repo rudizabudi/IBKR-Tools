@@ -41,8 +41,9 @@ class TWSCon(EWrapper, EClient):
         if errorCode not in (200,):
             tprint(f'{reqId}, {errorCode}, {errorString}')
 
-        # if reqId in ReqId.reqId_hashmap.keys():
-        #     ReqId.reqId_hashmap[reqId](error=True)
+        if reqId in ReqId.reqId_hashmap.keys():
+            if 'error' in ReqId.reqId_hashmap[reqId].func.__annotations__:
+                ReqId.reqId_hashmap[reqId](error=True)
 
     def contractDetails(self, reqId: int, contractDetails):
         #print(f'ContractDetails Callback  {contractDetails.__dict__=}')
@@ -62,7 +63,7 @@ class TWSCon(EWrapper, EClient):
 
     def tickOptionComputation(self, reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice):
         super().tickOptionComputation(reqId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice)
-        #print('Greeks received')
+        print('Ticks received:', reqId, tickType, delta, gamma, theta, vega, impliedVol, optPrice, undPrice)
 
         bwd_greek_request = isinstance(self.core.threading_events['bwd_reqGreeks'].get(reqId, None), Event) and not self.core.threading_events['bwd_reqGreeks'][reqId].is_set()
         if tickType == 13 and delta is not None and bwd_greek_request:
@@ -104,22 +105,29 @@ class TWSCon(EWrapper, EClient):
             'realizedPNL': realizedPNL})
 
     def historicalData(self, reqId, bar):
-        #print('HistDataInc', bar)
+        print('HistDataInc', bar)
         if reqId not in ReqId.reqId_hashmap.keys():
             raise KeyError('ReqId not assigned to an security class instance.')
-
+        #print(f'HistoricalData: {reqId}, {bar.date}, {bar.open}, {bar.high}, {bar.low}, {bar.close}')
         ReqId.reqId_hashmap[reqId]({'date': bar.date, 'open': bar.open, 'high': bar.high, 'low': bar.low, 'close': bar.close})
 
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         super().historicalDataEnd(reqId, start, end)
-
-        if isinstance(self.core.threading_events['bwd_reqHistoricalData'], Event) and not self.core.threading_events['bwd_reqHistoricalData'].is_set():
+        print(f'historicalDataEnd: {reqId}, {start}, {end} {self.core.threading_events}')
+        if isinstance(self.core.threading_events.get('bwd_reqHistoricalData'), Event) and not self.core.threading_events['bwd_reqHistoricalData'].is_set():
+            print(345)
             self.core.threading_events['bwd_reqHistoricalData'].set()
+        elif isinstance(self.core.threading_events.get('bxs_reqHistoricalData'), Event) and not self.core.threading_events['bxs_reqHistoricalData'].is_set():
+            print(2345)
+            self.core.threading_events['bxs_reqHistoricalData'].set()
+        elif isinstance(self.core.threading_events.get('bxs_combo_request_prices'), Event) and not self.core.threading_events['bxs_combo_request_prices'].is_set():
+            print(12345)
+            self.core.threading_events['bxs_combo_request_prices'].set()
 
     def accountDownloadEnd(self, accountName: str):
         super().accountDownloadEnd(accountName)
         print('accountDownloadEnd')
-        if isinstance(self.core.threading_events['bwd_reqAccountUpdates'], Event) and not self.core.threading_events['bwd_reqAccountUpdates'].is_set():
+        if isinstance(self.core.threading_events.get('bwd_reqAccountUpdates'), Event) and not self.core.threading_events['bwd_reqAccountUpdates'].is_set():
             self.core.threading_events['bwd_reqAccountUpdates'].set()
 
 
