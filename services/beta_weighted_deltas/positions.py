@@ -3,7 +3,7 @@ from datetime import datetime
 from ibapi.contract import Contract as ibContract
 
 from core import Core, CoreDistributor
-from services.contracts import create_benchmark_contract, create_position_contract
+from services.contracts import build_benchmark_contract, build_position_contract
 
 
 class Position:
@@ -11,9 +11,9 @@ class Position:
         self.core: Core = CoreDistributor.get_core()
 
         if benchmark:
-            self.contract: ibContract = create_benchmark_contract()
+            self.contract: ibContract = build_benchmark_contract()
         else:
-            self.contract: ibContract = create_position_contract(**kwargs['contract'])
+            self.contract: ibContract = build_position_contract(**kwargs['contract'])
 
         self.symbol: str = self.contract.symbol
         self.qty: int | float = kwargs.get('position', 0.0)
