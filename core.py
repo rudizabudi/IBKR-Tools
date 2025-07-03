@@ -60,12 +60,10 @@ class Core:
             cls.API_PORT = profile['api_port']
             cls.CLIENT_ID = profile['api_client_id']
             cls.ACCOUNT_ID = profile['ibkr_account_id']
-            cls.BENCHMARK = profile['beta_benchmark']
-            cls.BETA_PERIOD = profile['beta_period']
         except KeyError as e:
             raise KeyError(f'Missing key in config file: {e}')
 
-        cls.settings: dict[str, int] = config['settings']['beta_weighted_deltas']
+        cls.settings: dict[str, dict[str, str | int]] = config['settings']
 
     @classmethod
     def create_var_space(cls):
