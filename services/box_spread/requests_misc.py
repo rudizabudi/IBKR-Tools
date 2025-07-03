@@ -3,12 +3,10 @@ from datetime import datetime as dt, timedelta
 from functools import partial
 
 from ibapi.contract import Contract as ibContract
-from itertools import chain
 from threading import Event
 from time import sleep
 
 from core import CoreDistributor, ReqId
-from services import contracts
 from services.tws_api import TWSCon, TWSConDistributor
 
 
@@ -57,33 +55,35 @@ class conIdCache:
     conIDs = {}
 
     @classmethod
-    def set_conId(cls, symbol: str, contractDetails: dict[str, ibContract | str | int | float]):
-        cls.conIDs[symbol] = contractDetails.contract.conId
+    def set_conId(cls, contract: ibContract, contractDetails: dict[str, ibContract | str | int | float]):
+        cls.conIDs[contract] = contractDetails.contract.conId
 
         core = CoreDistributor.get_core()
         if core.threading_events['reqConid']:
             core.threading_events['reqConid'].set()
 
     @classmethod
-    def get_conId(cls, symbol: str) -> int | None:
-        if symbol not in cls.conIDs.keys():
+    def get_conId(cls, contract: ibContract) -> int | None:
+
+        if contract not in cls.conIDs.keys():
             return None
-        return cls.conIDs[symbol]
+        return cls.conIDs[contract]
 
 
-def request_conId(index_contract: ibContract, con: TWSCon, core) -> int:
+def request_conId(contract: ibContract) -> int:
 
-    if (conId := conIdCache.get_conId(index_contract.symbol)) is None:
-        reqId = ReqId.register_reqId()
+    if (conId := conIdCache.get_conId(contract)) is None:
+        core = CoreDistributor.get_core()
+        con = TWSConDistributor.get_con()
 
-        conId_callback = partial(conIdCache.set_conId, symbol=index_contract.symbol)
+        conId_callback = partial(conIdCache.set_conId, contract=contract)
+        reqId = ReqId.register_reqId(conId_callback)
 
-        ReqId.reqId_hashmap[reqId] = conId_callback
         core.threading_events['reqConid'] = Event()
-        con.reqContractDetails(reqId, index_contract)
+        con.reqContractDetails(reqId, contract)
         core.threading_events['reqConid'].wait()
 
-        conId = conIdCache.get_conId(index_contract.symbol)
+        conId = conIdCache.get_conId(contract)
 
     return conId
 
@@ -92,7 +92,7 @@ def request_index_expiries(index_contract: ibContract):
     core = CoreDistributor.get_core()
     tws_con = TWSConDistributor.get_con()
 
-    conId = request_conId(index_contract, tws_con, core)
+    conId = request_conId(index_contract)
     reqId = ReqId.register_reqId(BXSOptionChainData.set_data)
 
     tws_con.reqSecDefOptParams(
